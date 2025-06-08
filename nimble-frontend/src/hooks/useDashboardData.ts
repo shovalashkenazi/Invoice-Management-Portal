@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@chakra-ui/react";
 
 interface StatusData {
@@ -41,29 +41,69 @@ interface DashboardData {
   loading: boolean;
 }
 
+// API response type for better type safety
+interface ApiResponse {
+  totalsByStatus: { status: string; _sum: { cost: number } }[];
+  monthlySummaries: {
+    invoiceDate: string;
+    _sum: { cost: number };
+    _count: { id: number };
+  }[];
+  overdueTrend: { month: string; count: number; total: number }[];
+  totalsByCustomer: {
+    supplierId: string;
+    supplier?: { companyName: string };
+    _sum: { cost: number };
+    _count: { id: number };
+  }[];
+  customers: { id: string; companyName: string }[];
+  overdueInvoiceCounts: number;
+}
+
+// Constants for maintainability
+const API_ENDPOINTS = {
+  AGGREGATED: "http://localhost:3000/invoices/aggregated",
+  FILTERED: "http://localhost:3000/invoices/filtered",
+} as const;
+
+const TOAST_CONFIG = {
+  FILTER_SUCCESS: {
+    title: "Filters Applied",
+    description: "Dashboard updated with filtered data",
+    status: "success" as const,
+    duration: 2000,
+    isClosable: true,
+  },
+  ERROR: {
+    title: "Error",
+    description: "Failed to fetch dashboard data",
+    status: "error" as const,
+    duration: 3000,
+    isClosable: true,
+  },
+};
+
 export const useDashboardData = (
   filters: FilterState,
   currency: "USD" | "EUR" | "GBP",
-  refreshTrigger: number // Added to trigger re-fetch
+  refreshTrigger: number
 ): DashboardData => {
   const toast = useToast();
   const [loading, setLoading] = useState(true);
-  const [totalsByStatus, setTotalsByStatus] = useState<StatusData[]>([]);
-  const [overdueTrend, setOverdueTrend] = useState<OverdueData[]>([]);
-  const [monthlyTotals, setMonthlyTotals] = useState<MonthlyData[]>([]);
-  const [totalsByCustomer, setTotalsByCustomer] = useState<CustomerData[]>([]);
-  const [customers, setCustomers] = useState<
-    { id: string; companyName: string }[]
-  >([]);
-  const [overdueCount, setOverdueCount] = useState<number>(0);
+  const [data, setData] = useState<ApiResponse | null>(null);
 
-  const isFilterActive = Object.values(filters).some((value) => value !== "");
+  const isFilterActive = useMemo(
+    () => Object.values(filters).some((value) => value !== ""),
+    [filters]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        let endpoint = "http://localhost:3000/invoices/aggregated";
+        const endpoint = isFilterActive
+          ? API_ENDPOINTS.FILTERED
+          : API_ENDPOINTS.AGGREGATED;
         const queryParams: Record<string, string> = { currency };
 
         if (isFilterActive) {
@@ -72,99 +112,100 @@ export const useDashboardData = (
             .forEach(([key, value]) => {
               queryParams[key] = value;
             });
-          endpoint = `http://localhost:3000/invoices/filtered`;
         }
 
         const query = new URLSearchParams(queryParams).toString();
         const res = await fetch(`${endpoint}?${query}`);
-        const data = await res.json();
-
-        // Merge totalsByStatus by status to avoid duplicates and round totals
-        const statusMap = new Map<string, number>();
-        data.totalsByStatus?.forEach((item: any) => {
-          const currentTotal = statusMap.get(item.status) || 0;
-          statusMap.set(item.status, currentTotal + (item._sum?.cost || 0));
-        });
-        const transformedStatusData = Array.from(statusMap.entries()).map(
-          ([status, total]) => ({
-            status,
-            total: Number(total.toFixed(2)),
-          })
-        );
-
-        const monthlyMap = new Map<
-          string,
-          { totalAmount: number; invoiceCount: number }
-        >();
-        data.monthlySummaries?.forEach((item: any) => {
-          const date = new Date(item.invoiceDate);
-          const monthKey = `${date.getFullYear()}-${String(
-            date.getMonth() + 1
-          ).padStart(2, "0")}`;
-          const current = monthlyMap.get(monthKey) || {
-            totalAmount: 0,
-            invoiceCount: 0,
-          };
-          monthlyMap.set(monthKey, {
-            totalAmount: current.totalAmount + (item._sum?.cost || 0),
-            invoiceCount: current.invoiceCount + (item._count?.id || 0),
-          });
-        });
-
-        const transformedMonthlyData = Array.from(monthlyMap.entries())
-          .map(([month, data]) => ({
-            month,
-            total: Number(data.totalAmount.toFixed(2)),
-            count: data.invoiceCount,
-          }))
-          .sort((a, b) => a.month.localeCompare(b.month));
-
-        const transformedOverdueData =
-          data.overdueTrend?.map((item: any) => ({
-            date: item.month,
-            count: item.count || 0,
-            total: Number((item.total || 0).toFixed(2)),
-          })) || [];
-
-        const transformedCustomerData =
-          data.totalsByCustomer?.map((item: any) => ({
-            name: item.supplier?.companyName || `Customer ${item.supplierId}`,
-            total: Number((item._sum?.cost || 0).toFixed(2)),
-            count: item._count?.id || 0,
-          })) || [];
-
-        setTotalsByStatus(transformedStatusData);
-        setOverdueCount(data.overdueInvoiceCounts || 0);
-        setMonthlyTotals(transformedMonthlyData);
-        setOverdueTrend(transformedOverdueData);
-        setTotalsByCustomer(transformedCustomerData);
-        setCustomers(data.customers || []);
+        if (!res.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const responseData: ApiResponse = await res.json();
+        setData(responseData);
 
         if (isFilterActive) {
-          toast({
-            title: "Filters Applied",
-            description: "Dashboard updated with filtered data",
-            status: "success",
-            duration: 2000,
-            isClosable: true,
-          });
+          toast(TOAST_CONFIG.FILTER_SUCCESS);
         }
       } catch (err) {
         console.error("Failed to fetch aggregated data", err);
-        toast({
-          title: "Error",
-          description: "Failed to fetch dashboard data",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+        toast(TOAST_CONFIG.ERROR);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [filters, currency, refreshTrigger]); // Added refreshTrigger as dependency
+  }, [filters, currency, refreshTrigger, toast, isFilterActive]);
+
+  // Memoized data transformations
+  const totalsByStatus = useMemo(() => {
+    if (!data) return [];
+    const statusMap = new Map<string, number>();
+    data.totalsByStatus.forEach((item) => {
+      const currentTotal = statusMap.get(item.status) || 0;
+      statusMap.set(item.status, currentTotal + (item._sum.cost || 0));
+    });
+    return Array.from(statusMap.entries()).map(([status, total]) => ({
+      status,
+      total: Number(total.toFixed(2)),
+    }));
+  }, [data]);
+
+  const monthlyTotals = useMemo(() => {
+    if (!data) return [];
+    const monthlyMap = new Map<
+      string,
+      { totalAmount: number; invoiceCount: number }
+    >();
+    data.monthlySummaries.forEach((item) => {
+      const date = new Date(item.invoiceDate);
+      const monthKey = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+      const current = monthlyMap.get(monthKey) || {
+        totalAmount: 0,
+        invoiceCount: 0,
+      };
+      monthlyMap.set(monthKey, {
+        totalAmount: current.totalAmount + (item._sum.cost || 0),
+        invoiceCount: current.invoiceCount + (item._count.id || 0),
+      });
+    });
+    return Array.from(monthlyMap.entries())
+      .map(([month, data]) => ({
+        month,
+        total: Number(data.totalAmount.toFixed(2)),
+        count: data.invoiceCount,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }, [data]);
+
+  const overdueTrend = useMemo(() => {
+    if (!data) return [];
+    return (data.overdueTrend || []).map((item) => ({
+      date: item.month,
+      count: item.count || 0,
+      total: Number((item.total || 0).toFixed(2)),
+    }));
+  }, [data]);
+
+  const totalsByCustomer = useMemo(() => {
+    if (!data) return [];
+    return (data.totalsByCustomer || []).map((item) => ({
+      name: item.supplier?.companyName || `Customer ${item.supplierId}`,
+      total: Number((item._sum.cost || 0).toFixed(2)),
+      count: item._count.id || 0,
+    }));
+  }, [data]);
+
+  const customers = useMemo(() => {
+    if (!data) return [];
+    return data.customers || [];
+  }, [data]);
+
+  const overdueCount = useMemo(() => {
+    if (!data) return 0;
+    return data.overdueInvoiceCounts || 0;
+  }, [data]);
 
   return {
     totalsByStatus,
@@ -176,3 +217,5 @@ export const useDashboardData = (
     loading,
   };
 };
+
+export default useDashboardData;

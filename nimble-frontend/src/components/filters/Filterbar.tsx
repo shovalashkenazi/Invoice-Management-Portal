@@ -17,19 +17,39 @@ interface Customer {
   companyName: string;
 }
 
+interface FilterState {
+  from: string;
+  to: string;
+  status: string;
+  customer: string;
+}
+
 interface Props {
   from: string;
   to: string;
   status: string;
   customer: string;
   customers: Customer[];
-  onChange: (filters: {
-    from: string;
-    to: string;
-    status: string;
-    customer: string;
-  }) => void;
+  onChange: <K extends keyof FilterState>(
+    key: K,
+    value: FilterState[K]
+  ) => void;
 }
+
+// Constants for maintainability
+const START_YEAR = 2020;
+const END_YEAR = 2025;
+const MONTHS = Array.from({ length: 12 }, (_, i) =>
+  (i + 1).toString().padStart(2, "0")
+).concat("All");
+const YEARS = Array.from(
+  { length: END_YEAR - START_YEAR + 1 },
+  (_, i) => START_YEAR + i
+)
+  .map((year) => year.toString())
+  .concat("All")
+  .reverse(); // Latest years first
+const STATUSES = ["CONFIRMED", "CANCELLED", "PENDING"];
 
 const FilterBar = ({
   from,
@@ -42,17 +62,37 @@ const FilterBar = ({
   const [isOpen, setIsOpen] = useState(true);
   const isMobile = useBreakpointValue({ base: true, md: false });
 
-  // Generate years range (e.g., 2020-2025)
-  const years = Array.from({ length: 2025 - 2020 + 1 }, (_, i) => 2020 + i).map(
-    (year) => year.toString()
-  );
-  years.unshift("All");
+  // Helper to get year and month from date string
+  const getDateParts = (date: string) => {
+    const [year, month] = date.split("-");
+    return { year: year || "All", month: month || "All" };
+  };
 
-  // Months array
-  const months = Array.from({ length: 12 }, (_, i) =>
-    (i + 1).toString().padStart(2, "0")
-  );
-  months.unshift("All");
+  // Handle year and month changes with validation
+  const handleDateChange = (
+    key: "from" | "to",
+    type: "year" | "month",
+    value: string
+  ) => {
+    const current = key === "from" ? from : to;
+    const { year, month } = getDateParts(current);
+    const currentYear =
+      year !== "All" ? year : new Date().getFullYear().toString();
+
+    if (type === "year") {
+      const newYear = value === "All" ? "" : value;
+      const newValue = newYear
+        ? month !== "All"
+          ? `${newYear}-${month}`
+          : `${newYear}-${key === "from" ? "01" : "12"}`
+        : "";
+      onChange(key, newValue);
+    } else {
+      const newMonth = value === "All" ? "" : value;
+      const newValue = newMonth ? `${currentYear}-${newMonth}` : currentYear;
+      onChange(key, newValue);
+    }
+  };
 
   return (
     <Box
@@ -84,6 +124,7 @@ const FilterBar = ({
             variant="ghost"
             onClick={() => setIsOpen(!isOpen)}
             rightIcon={isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            aria-label={isOpen ? "Hide filters" : "Show filters"}
           >
             {isOpen ? "Hide" : "Show"}
           </Button>
@@ -95,15 +136,12 @@ const FilterBar = ({
           <FormControl>
             <FormLabel fontSize={{ base: "sm", md: "md" }}>From Year</FormLabel>
             <Select
-              value={from.split("-")[0] || "All"}
-              onChange={(e) => {
-                const year =
-                  e.target.value === "All" ? "" : `${e.target.value}-01`;
-                onChange({ from: year, to, status, customer });
-              }}
+              value={getDateParts(from).year}
+              onChange={(e) => handleDateChange("from", "year", e.target.value)}
               size={{ base: "sm", md: "md" }}
+              aria-label="Select from year"
             >
-              {years.map((year) => (
+              {YEARS.map((year) => (
                 <option key={year} value={year}>
                   {year}
                 </option>
@@ -116,18 +154,15 @@ const FilterBar = ({
               From Month
             </FormLabel>
             <Select
-              value={from.split("-")[1] || "All"}
-              onChange={(e) => {
-                const year =
-                  from.split("-")[0] || new Date().getFullYear().toString();
-                const month = e.target.value === "All" ? "" : e.target.value;
-                const newFrom = month ? `${year}-${month}` : year;
-                onChange({ from: newFrom, to, status, customer });
-              }}
-              isDisabled={!from || from === "All"}
+              value={getDateParts(from).month}
+              onChange={(e) =>
+                handleDateChange("from", "month", e.target.value)
+              }
+              isDisabled={getDateParts(from).year === "All"}
               size={{ base: "sm", md: "md" }}
+              aria-label="Select from month"
             >
-              {months.map((month) => (
+              {MONTHS.map((month) => (
                 <option key={month} value={month}>
                   {month}
                 </option>
@@ -138,15 +173,12 @@ const FilterBar = ({
           <FormControl>
             <FormLabel fontSize={{ base: "sm", md: "md" }}>To Year</FormLabel>
             <Select
-              value={to.split("-")[0] || "All"}
-              onChange={(e) => {
-                const year =
-                  e.target.value === "All" ? "" : `${e.target.value}-12`;
-                onChange({ from, to: year, status, customer });
-              }}
+              value={getDateParts(to).year}
+              onChange={(e) => handleDateChange("to", "year", e.target.value)}
               size={{ base: "sm", md: "md" }}
+              aria-label="Select to year"
             >
-              {years.map((year) => (
+              {YEARS.map((year) => (
                 <option key={year} value={year}>
                   {year}
                 </option>
@@ -157,18 +189,13 @@ const FilterBar = ({
           <FormControl>
             <FormLabel fontSize={{ base: "sm", md: "md" }}>To Month</FormLabel>
             <Select
-              value={to.split("-")[1] || "All"}
-              onChange={(e) => {
-                const year =
-                  to.split("-")[0] || new Date().getFullYear().toString();
-                const month = e.target.value === "All" ? "" : e.target.value;
-                const newTo = month ? `${year}-${month}` : year;
-                onChange({ from, to: newTo, status, customer });
-              }}
-              isDisabled={!to || to === "All"}
+              value={getDateParts(to).month}
+              onChange={(e) => handleDateChange("to", "month", e.target.value)}
+              isDisabled={getDateParts(to).year === "All"}
               size={{ base: "sm", md: "md" }}
+              aria-label="Select to month"
             >
-              {months.map((month) => (
+              {MONTHS.map((month) => (
                 <option key={month} value={month}>
                   {month}
                 </option>
@@ -181,14 +208,15 @@ const FilterBar = ({
             <Select
               placeholder="All"
               value={status}
-              onChange={(e) =>
-                onChange({ from, to, status: e.target.value, customer })
-              }
+              onChange={(e) => onChange("status", e.target.value)}
               size={{ base: "sm", md: "md" }}
+              aria-label="Select status"
             >
-              <option value="CONFIRMED">CONFIRMED</option>
-              <option value="CANCELLED">CANCELLED</option>
-              <option value="PENDING">PENDING</option>
+              {STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
             </Select>
           </FormControl>
 
@@ -197,10 +225,9 @@ const FilterBar = ({
             <Select
               placeholder="All"
               value={customer}
-              onChange={(e) =>
-                onChange({ from, to, status, customer: e.target.value })
-              }
+              onChange={(e) => onChange("customer", e.target.value)}
               size={{ base: "sm", md: "md" }}
+              aria-label="Select customer"
             >
               {customers?.map((c) => (
                 <option key={c.id} value={c.companyName}>

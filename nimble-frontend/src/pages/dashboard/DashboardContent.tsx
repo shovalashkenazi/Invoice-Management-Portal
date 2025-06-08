@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Box,
   SimpleGrid,
@@ -19,9 +19,10 @@ import MonthlySummaryBarChart from "../../components/charts/MonthlySummaryBarCha
 import MonthlySummaryLineChart from "../../components/charts/MonthlySummaryLineChart";
 import CustomerTotalsHorizontalChart from "../../components/charts/CustomerTotalsHorizontalChart";
 import { useDashboardData } from "../../hooks/useDashboardData";
-import { useToast, UseToastOptions } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import Lottie from "react-lottie";
 import uploadLottie from "../../assets/animations/uplaodAnimation.json";
+import { memo } from "react";
 
 interface FilterState {
   from: string;
@@ -29,6 +30,81 @@ interface FilterState {
   status: string;
   customer: string;
 }
+
+interface StatusData {
+  status: string;
+  total: number;
+}
+
+interface MonthlyData {
+  month: string;
+  total: number;
+  count: number;
+}
+
+interface OverdueData {
+  date: string;
+  count: number;
+  total: number;
+}
+
+interface CustomerData {
+  name: string;
+  total: number;
+  count: number;
+}
+
+// Constants for maintainability
+const CHART_HEIGHT = "400px";
+const UPLOAD_API_URL = "http://localhost:3000/invoices/upload";
+const MIN_ANIMATION_DURATION = 4000;
+
+// Memoized chart components to optimize performance
+const MemoizedInvoiceStatusPieChart = memo(
+  ({ data, currency }: { data: StatusData[]; currency: string }) => (
+    <InvoiceStatusPieChart data={data} currency={currency} />
+  )
+);
+MemoizedInvoiceStatusPieChart.displayName = "MemoizedInvoiceStatusPieChart";
+
+const MemoizedInvoiceStatusBarChart = memo(
+  ({ data, currency }: { data: StatusData[]; currency: string }) => (
+    <InvoiceStatusBarChart data={data} currency={currency} />
+  )
+);
+MemoizedInvoiceStatusBarChart.displayName = "MemoizedInvoiceStatusBarChart";
+
+const MemoizedOverdueTrendLineChart = memo(
+  ({ data }: { data: OverdueData[] }) => <OverdueTrendLineChart data={data} />
+);
+MemoizedOverdueTrendLineChart.displayName = "MemoizedOverdueTrendLineChart";
+
+const MemoizedOverdueTrendAreaChart = memo(
+  ({ data }: { data: OverdueData[] }) => <OverdueTrendAreaChart data={data} />
+);
+MemoizedOverdueTrendAreaChart.displayName = "MemoizedOverdueTrendAreaChart";
+
+const MemoizedMonthlySummaryBarChart = memo(
+  ({ data, currency }: { data: MonthlyData[]; currency: string }) => (
+    <MonthlySummaryBarChart data={data} currency={currency} />
+  )
+);
+MemoizedMonthlySummaryBarChart.displayName = "MemoizedMonthlySummaryBarChart";
+
+const MemoizedMonthlySummaryLineChart = memo(
+  ({ data, currency }: { data: MonthlyData[]; currency: string }) => (
+    <MonthlySummaryLineChart data={data} currency={currency} />
+  )
+);
+MemoizedMonthlySummaryLineChart.displayName = "MemoizedMonthlySummaryLineChart";
+
+const MemoizedCustomerTotalsHorizontalChart = memo(
+  ({ data, currency }: { data: CustomerData[]; currency: string }) => (
+    <CustomerTotalsHorizontalChart data={data} currency={currency} />
+  )
+);
+MemoizedCustomerTotalsHorizontalChart.displayName =
+  "MemoizedCustomerTotalsHorizontalChart";
 
 const DashboardContent = () => {
   const cardBg = useColorModeValue("white", "gray.800");
@@ -47,7 +123,7 @@ const DashboardContent = () => {
   });
   const [currency, setCurrency] = useState<"USD" | "EUR" | "GBP">("USD");
   const [isLoading, setIsLoading] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0); // State to trigger re-fetch
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const toast = useToast();
 
   const {
@@ -59,117 +135,113 @@ const DashboardContent = () => {
     overdueCount,
   } = useDashboardData(filters, currency, refreshTrigger);
 
-  useEffect(() => {
-    // This effect can be used to handle side effects if needed, but re-fetch is handled by useDashboardData
-  }, [refreshTrigger]); // Dependency on refreshTrigger
+  // Generic filter update function for type safety and modularity
+  const updateFilter = useCallback(
+    <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilters({
       from: "",
       to: "",
       status: "",
       customer: "",
     });
-  };
+  }, []);
 
-  const isFilterActive = Object.values(filters).some((value) => value !== "");
-
-  const defaultOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: uploadLottie,
-    rendererSettings: {
-      preserveAspectRatio: "xMidYMid slice",
-    },
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      toast({
-        title: "Upload Error",
-        description: "No file selected. Please choose a CSV file to upload.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-    setIsLoading(true);
-
-    let toastMessage: UseToastOptions | null = null;
-
-    try {
-      const res = await fetch("http://localhost:3000/invoices/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        toastMessage = {
-          title: "Upload Success",
-          description: result.message || "CSV uploaded successfully!",
-          status: "success" as const,
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        toast({
+          title: "Upload Error",
+          description: "Please select a CSV file to upload.",
+          status: "error",
           duration: 5000,
           isClosable: true,
-        };
-      } else {
-        const error = await res.json();
-        let description =
-          error.message || "Upload failed due to an unknown error.";
-        if (
-          error.message &&
-          error.message.includes("Validation errors found")
-        ) {
-          const match = error.message.match(
-            /Invoice (\w+): Missing or invalid fields - (.+)/
-          );
-          if (match) {
-            const invoiceId = match[1];
-            const fields = match[2]
-              .split(", ")
-              .map((field: string) => field.trim());
-            description = `Failed to upload invoice ${invoiceId} due to missing or invalid fields: ${fields.join(
-              ", "
-            )}.`;
-          }
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch(UPLOAD_API_URL, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "Upload failed.");
         }
-        toastMessage = {
+
+        toast({
+          title: "Upload Success",
+          description: data.message || "CSV uploaded successfully!",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        setRefreshTrigger((prev) => prev + 1);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "An unexpected error occurred.";
+        const description = message.includes("Validation errors found")
+          ? message.replace(
+              /Invoice (\w+): Missing or invalid fields - (.+)/,
+              (_, id, fields) =>
+                `Failed to upload invoice ${id} due to missing or invalid fields: ${fields}.`
+            )
+          : message;
+
+        toast({
           title: "Upload Error",
-          description: description,
-          status: "error" as const,
+          description,
+          status: "error",
           duration: 7000,
           isClosable: true,
-        };
+        });
+      } finally {
+        await new Promise((resolve) =>
+          setTimeout(resolve, MIN_ANIMATION_DURATION)
+        );
+        setIsLoading(false);
+        e.target.value = "";
       }
-    } catch (err) {
-      toastMessage = {
-        title: "Upload Error",
-        description:
-          "An unexpected error occurred during upload. Please try again or contact support.",
-        status: "error" as const,
-        duration: 7000,
-        isClosable: true,
-      };
-      console.error(err);
-    } finally {
-      // Ensure animation runs for at least 4 seconds
-      await new Promise((resolve) => setTimeout(resolve, 4000));
-      setIsLoading(false); // Stop loading
-      e.target.value = ""; // Reset input
-      if (toastMessage) {
-        toast(toastMessage);
-      }
-      // Refresh data only if upload was successful
-      if (toastMessage?.status === "success") {
-        setRefreshTrigger((prev) => prev + 1); // Increment to trigger re-fetch
-      }
-    }
-  };
+    },
+    [toast]
+  );
+
+  const isFilterActive = useMemo(
+    () => Object.values(filters).some((value) => value !== ""),
+    [filters]
+  );
+
+  const totalInvoices = useMemo(
+    () =>
+      totalsByStatus
+        .reduce((sum, item) => sum + (item.total || 0), 0)
+        .toLocaleString(undefined, { style: "currency", currency }),
+    [totalsByStatus, currency]
+  );
+
+  const defaultOptions = useMemo(
+    () => ({
+      loop: true,
+      autoplay: true,
+      animationData: uploadLottie,
+      rendererSettings: {
+        preserveAspectRatio: "xMidYMid slice",
+      },
+    }),
+    []
+  );
 
   return (
     <Grid
@@ -189,6 +261,7 @@ const DashboardContent = () => {
             size="sm"
             rightIcon={<Text fontSize="sm">📤</Text>}
             _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
+            aria-label="Upload CSV file"
           >
             Upload CSV
           </Button>
@@ -198,6 +271,7 @@ const DashboardContent = () => {
             id="csv-upload"
             style={{ display: "none" }}
             onChange={handleFileUpload}
+            aria-hidden="true"
           />
         </Box>
         <Box mb={4}>
@@ -211,10 +285,11 @@ const DashboardContent = () => {
               setCurrency(e.target.value as "USD" | "EUR" | "GBP")
             }
             size="sm"
+            aria-label="Select currency"
           >
-            <option value="USD"> USD 💵</option>
-            <option value="EUR"> EUR 💶</option>
-            <option value="GBP"> GBP 💷</option>
+            <option value="USD">USD 💵</option>
+            <option value="EUR">EUR 💶</option>
+            <option value="GBP">GBP 💷</option>
           </Select>
         </Box>
 
@@ -224,7 +299,7 @@ const DashboardContent = () => {
           status={filters.status}
           customer={filters.customer}
           customers={customers}
-          onChange={setFilters}
+          onChange={updateFilter}
         />
       </Box>
 
@@ -247,6 +322,7 @@ const DashboardContent = () => {
                 colorScheme="blue"
                 variant="outline"
                 onClick={clearFilters}
+                aria-label="Clear all filters"
               >
                 Clear Filters
               </Button>
@@ -290,9 +366,7 @@ const DashboardContent = () => {
               Total Invoices
             </Text>
             <Text fontSize="2xl" fontWeight="bold" color="blue.500">
-              {totalsByStatus
-                .reduce((sum, item) => sum + (item.total || 0), 0)
-                .toLocaleString(undefined, { style: "currency", currency })}
+              {totalInvoices}
             </Text>
             <Text fontSize="xs" color="gray.400">
               Amount {isFilterActive ? "(Filtered)" : ""}
@@ -306,9 +380,9 @@ const DashboardContent = () => {
             borderRadius="xl"
             p={4}
             boxShadow="sm"
-            h="400px"
-            minHeight="400px"
-            maxHeight="400px"
+            h={CHART_HEIGHT}
+            minHeight={CHART_HEIGHT}
+            maxHeight={CHART_HEIGHT}
           >
             <Flex justify="space-between" align="center" mb={2}>
               <Text fontSize="md" fontWeight="semibold">
@@ -323,24 +397,26 @@ const DashboardContent = () => {
                 <Button
                   onClick={() => setStatusChartType("pie")}
                   isActive={statusChartType === "pie"}
+                  aria-label="Show pie chart"
                 >
                   Pie
                 </Button>
                 <Button
                   onClick={() => setStatusChartType("bar")}
                   isActive={statusChartType === "bar"}
+                  aria-label="Show bar chart"
                 >
                   Bar
                 </Button>
               </ButtonGroup>
             </Flex>
             {statusChartType === "pie" ? (
-              <InvoiceStatusPieChart
+              <MemoizedInvoiceStatusPieChart
                 data={totalsByStatus}
                 currency={currency}
               />
             ) : (
-              <InvoiceStatusBarChart
+              <MemoizedInvoiceStatusBarChart
                 data={totalsByStatus}
                 currency={currency}
               />
@@ -352,9 +428,9 @@ const DashboardContent = () => {
             borderRadius="xl"
             p={4}
             boxShadow="sm"
-            h="400px"
-            minHeight="400px"
-            maxHeight="400px"
+            h={CHART_HEIGHT}
+            minHeight={CHART_HEIGHT}
+            maxHeight={CHART_HEIGHT}
           >
             <Flex justify="space-between" align="center" mb={2}>
               <Text fontSize="md" fontWeight="semibold">
@@ -369,21 +445,23 @@ const DashboardContent = () => {
                 <Button
                   onClick={() => setOverdueChartType("line")}
                   isActive={overdueChartType === "line"}
+                  aria-label="Show line chart"
                 >
                   Line
                 </Button>
                 <Button
                   onClick={() => setOverdueChartType("area")}
                   isActive={overdueChartType === "area"}
+                  aria-label="Show area chart"
                 >
                   Area
                 </Button>
               </ButtonGroup>
             </Flex>
             {overdueChartType === "line" ? (
-              <OverdueTrendLineChart data={overdueTrend} />
+              <MemoizedOverdueTrendLineChart data={overdueTrend} />
             ) : (
-              <OverdueTrendAreaChart data={overdueTrend} />
+              <MemoizedOverdueTrendAreaChart data={overdueTrend} />
             )}
           </Box>
         </SimpleGrid>
@@ -394,9 +472,9 @@ const DashboardContent = () => {
             borderRadius="xl"
             p={4}
             boxShadow="sm"
-            h="400px"
-            minHeight="400px"
-            maxHeight="400px"
+            h={CHART_HEIGHT}
+            minHeight={CHART_HEIGHT}
+            maxHeight={CHART_HEIGHT}
           >
             <Flex justify="space-between" align="center" mb={2}>
               <Text fontSize="md" fontWeight="semibold">
@@ -411,24 +489,26 @@ const DashboardContent = () => {
                 <Button
                   onClick={() => setMonthlyChartType("bar")}
                   isActive={monthlyChartType === "bar"}
+                  aria-label="Show bar chart"
                 >
                   Bar
                 </Button>
                 <Button
                   onClick={() => setMonthlyChartType("line")}
                   isActive={monthlyChartType === "line"}
+                  aria-label="Show line chart"
                 >
                   Line
                 </Button>
               </ButtonGroup>
             </Flex>
             {monthlyChartType === "bar" ? (
-              <MonthlySummaryBarChart
+              <MemoizedMonthlySummaryBarChart
                 data={monthlyTotals}
                 currency={currency}
               />
             ) : (
-              <MonthlySummaryLineChart
+              <MemoizedMonthlySummaryLineChart
                 data={monthlyTotals}
                 currency={currency}
               />
@@ -440,15 +520,15 @@ const DashboardContent = () => {
             borderRadius="xl"
             p={4}
             boxShadow="sm"
-            h="400px"
-            minHeight="400px"
-            maxHeight="400px"
+            h={CHART_HEIGHT}
+            minHeight={CHART_HEIGHT}
+            maxHeight={CHART_HEIGHT}
           >
-            <Text fontSize="md" fontWeight="semibold" mb={"2"}>
+            <Text fontSize="md" fontWeight="semibold" mb="2">
               Totals by Customer ({currency})
             </Text>
             {totalsByCustomer.length > 0 ? (
-              <CustomerTotalsHorizontalChart
+              <MemoizedCustomerTotalsHorizontalChart
                 data={totalsByCustomer}
                 currency={currency}
               />
