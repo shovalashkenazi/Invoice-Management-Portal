@@ -37,14 +37,4 @@ export class InvoicesController {
   async getFilteredData(@Query() filters: FilterDto) {
     return this.invoicesService.getFilteredData(filters);
   }
-
-  @Get()
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async getInvoices(
-    @Query('page', ParseIntPipe) page: number = 1,
-    @Query('limit', ParseIntPipe) limit: number = 20,
-    @Query() filters: FilterDto,
-  ) {
-    return this.invoicesService.getInvoices(page, limit, filters);
-  }
 }
