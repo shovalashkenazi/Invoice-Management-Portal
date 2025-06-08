@@ -181,6 +181,13 @@ const DashboardContent = () => {
           throw new Error(data.message || "Upload failed.");
         }
 
+        await new Promise((resolve) =>
+          setTimeout(resolve, MIN_ANIMATION_DURATION)
+        );
+        setIsLoading(false);
+        e.target.value = "";
+        setRefreshTrigger((prev) => prev + 1);
+
         toast({
           title: "Upload Success",
           description: data.message || "CSV uploaded successfully!",
@@ -188,7 +195,6 @@ const DashboardContent = () => {
           duration: 5000,
           isClosable: true,
         });
-        setRefreshTrigger((prev) => prev + 1);
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "An unexpected error occurred.";
@@ -200,19 +206,19 @@ const DashboardContent = () => {
             )
           : message;
 
-        toast({
-          title: "Upload Error",
-          description,
-          status: "error",
-          duration: 7000,
-          isClosable: true,
-        });
-      } finally {
         await new Promise((resolve) =>
           setTimeout(resolve, MIN_ANIMATION_DURATION)
         );
         setIsLoading(false);
         e.target.value = "";
+
+        toast({
+          title: "Upload Error",
+          description,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     },
     [toast]
@@ -544,5 +550,4 @@ const DashboardContent = () => {
     </Grid>
   );
 };
-
 export default DashboardContent;
