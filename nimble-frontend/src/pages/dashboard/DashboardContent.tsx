@@ -1,13 +1,8 @@
-// React hooks
 import { useState, useCallback, useMemo } from 'react';
-
-// Chakra UI components
-import { Box, Button, ButtonGroup, Flex, Grid, Select, SimpleGrid, Text, useColorModeValue, useToast } from '@chakra-ui/react';
-
-// Third-party libraries
+import { Box, Button, ButtonGroup, Flex, Grid, Select, SimpleGrid, Text, useColorModeValue } from '@chakra-ui/react';
 import Lottie from 'react-lottie';
 
-// Custom components - Charts
+// Chart Components
 import CustomerTotalsHorizontalChart from '../../components/charts/CustomerTotalsHorizontalChart';
 import InvoiceStatusBarChart from '../../components/charts/InvoiceStatusBarChart';
 import InvoiceStatusPieChart from '../../components/charts/InvoiceStatusPieChart';
@@ -16,23 +11,22 @@ import MonthlySummaryLineChart from '../../components/charts/MonthlySummaryLineC
 import OverdueTrendAreaChart from '../../components/charts/OverdueTrendAreaChart';
 import OverdueTrendLineChart from '../../components/charts/OverdueTrendLineChart';
 
-// Custom components - Other
+// Other Components
 import FilterBar from '../../components/filters/Filterbar';
 
-// Custom hooks
+// Hooks
 import { useDashboardData } from '../../hooks/useDashboardData';
+import { useCsvUpload } from '../../hooks/useFileUpload';
 
 // Types
 import { FilterState, InvoiceStatusChartType, MonthlyChartType, OverdueChartType, SupportedCurrency } from '../../types';
 
 // Assets
 import uploadAnimation from '../../assets/animations/uplaodAnimation.json';
-import { INVOICE_UPLOAD_ENDPOINT } from '../../constants';
 
-// === Main Component ===
 const DashboardContent = () => {
+  // === Theme ===
   const cardBackgroundColor = useColorModeValue('white', 'gray.800');
-  const toast = useToast();
 
   // === Chart Type State ===
   const [invoiceStatusChartType, setInvoiceStatusChartType] = useState<InvoiceStatusChartType>('pie');
@@ -49,11 +43,13 @@ const DashboardContent = () => {
 
   const [selectedCurrency, setSelectedCurrency] = useState<SupportedCurrency>('USD');
 
-  // === Loading State ===
-  const [isUploadingCsv, setIsUploadingCsv] = useState(false);
+  // === Data Management State ===
   const [dataRefreshCounter, setDataRefreshCounter] = useState(0);
 
-  // === Data Hook ===
+  // === Custom Hooks ===
+  const { isUploadingCsv, handleCsvFileUpload } = useCsvUpload(() => {
+    setDataRefreshCounter((previousCounter) => previousCounter + 1);
+  });
   const {
     totalsByStatus: invoiceTotalsByStatus,
     overdueTrend: overdueInvoicesTrend,
@@ -63,7 +59,7 @@ const DashboardContent = () => {
     overdueCount: totalOverdueInvoicesCount,
   } = useDashboardData(activeFilters, selectedCurrency, dataRefreshCounter);
 
-  // === Filter Handlers ===
+  // === Event Handlers ===
   const updateActiveFilter = useCallback(<K extends keyof FilterState>(filterKey: K, filterValue: FilterState[K]) => {
     setActiveFilters((previousFilters) => ({
       ...previousFilters,
@@ -78,80 +74,6 @@ const DashboardContent = () => {
       status: '',
       customer: '',
     });
-  }, []);
-
-  // === File Upload Handler ===
-  const handleCsvFileUpload = useCallback(
-    async (uploadEvent: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedFile = uploadEvent.target.files?.[0];
-      if (!selectedFile) {
-        toast({
-          title: 'Upload Error',
-          description: 'Please select a CSV file to upload.',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-        return;
-      }
-
-      setIsUploadingCsv(true);
-      const csvFormData = new FormData();
-      csvFormData.append('file', selectedFile);
-
-      try {
-        const uploadResponse = await fetch(INVOICE_UPLOAD_ENDPOINT, {
-          method: 'POST',
-          body: csvFormData,
-        });
-
-        const responseData = await uploadResponse.json();
-        if (!uploadResponse.ok) {
-          throw new Error(responseData.message || 'Upload failed.');
-        }
-
-        // Ensure minimum animation duration for UX
-        await new Promise((resolve) => setTimeout(resolve, 4000));
-
-        setIsUploadingCsv(false);
-        uploadEvent.target.value = '';
-        setDataRefreshCounter((previousCounter) => previousCounter + 1);
-
-        toast({
-          title: 'Upload Success',
-          description: responseData.message || 'CSV uploaded successfully!',
-          status: 'success',
-          duration: 5000,
-          isClosable: true,
-        });
-      } catch (uploadError) {
-        const errorMessage = uploadError instanceof Error ? uploadError.message : 'An unexpected error occurred.';
-        const friendlyErrorDescription = errorMessage.includes('Validation errors found')
-          ? errorMessage.replace(
-              /Invoice (\w+): Missing or invalid fields - (.+)/,
-              (_, invoiceId, missingFields) => `Failed to upload invoice ${invoiceId} due to missing or invalid fields: ${missingFields}.`,
-            )
-          : errorMessage;
-
-        await new Promise((resolve) => setTimeout(resolve, 4000));
-
-        setIsUploadingCsv(false);
-        uploadEvent.target.value = '';
-
-        toast({
-          title: 'Upload Error',
-          description: friendlyErrorDescription,
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    },
-    [toast],
-  );
-
-  const handleCurrencyChange = useCallback((newCurrency: SupportedCurrency) => {
-    setSelectedCurrency(newCurrency);
   }, []);
 
   // === Computed Values ===
@@ -179,7 +101,6 @@ const DashboardContent = () => {
     }),
     [],
   );
-
   // === Render ===
   return (
     <Grid templateColumns={{ base: '1fr', md: '260px 1fr' }} gap={{ base: 2, md: 6 }} py={{ base: 2, md: 4 }} fontFamily={'Varela Round, sans-serif'}>
@@ -211,7 +132,7 @@ const DashboardContent = () => {
             value={selectedCurrency}
             textAlign="center"
             justifyContent="center"
-            onChange={(e) => handleCurrencyChange(e.target.value as SupportedCurrency)}
+            onChange={(e) => setSelectedCurrency(e.target.value as SupportedCurrency)}
             size="sm"
             aria-label="Select currency"
           >

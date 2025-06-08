@@ -15,10 +15,7 @@ export interface FilterBarProps {
   status: string;
   customer: string;
   customers: CustomerOption[];
-  onChange: <K extends keyof FilterState>(
-    key: K,
-    value: FilterState[K]
-  ) => void;
+  onChange: <K extends keyof FilterState>(key: K, value: FilterState[K]) => void;
 }
 
 // =============================================================================
@@ -67,15 +64,15 @@ export interface DashboardData {
 // CHART CONFIGURATION TYPES
 // =============================================================================
 
-export type InvoiceStatusChartType = "pie" | "bar";
-export type OverdueChartType = "line" | "area";
-export type MonthlyChartType = "bar" | "line";
+export type InvoiceStatusChartType = 'pie' | 'bar';
+export type OverdueChartType = 'line' | 'area';
+export type MonthlyChartType = 'bar' | 'line';
 
 // =============================================================================
 // CURRENCY TYPES
 // =============================================================================
 
-export type SupportedCurrency = "USD" | "EUR" | "GBP";
+export type SupportedCurrency = 'USD' | 'EUR' | 'GBP';
 
 // =============================================================================
 // API RESPONSE TYPES

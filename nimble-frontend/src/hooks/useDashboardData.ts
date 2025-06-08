@@ -1,42 +1,33 @@
 // React hooks
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from 'react';
 
 // Chakra UI hooks
-import { useToast } from "@chakra-ui/react";
+import { useToast } from '@chakra-ui/react';
 
 // Types
-import { ApiResponse, DashboardData, FilterState } from "../types";
-import { API_ENDPOINTS, TOAST_CONFIG } from "../constants";
+import { ApiResponse, DashboardData, FilterState } from '../types';
+import { API_ENDPOINTS, TOAST_CONFIG } from '../constants';
 
 // === Custom Hook ===
-export const useDashboardData = (
-  filters: FilterState,
-  currency: "USD" | "EUR" | "GBP",
-  refreshTrigger: number
-): DashboardData => {
+export const useDashboardData = (filters: FilterState, currency: 'USD' | 'EUR' | 'GBP', refreshTrigger: number): DashboardData => {
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ApiResponse | null>(null);
 
   // Determine if any filters are active
-  const isFilterActive = useMemo(
-    () => Object.values(filters).some((value) => value !== ""),
-    [filters]
-  );
+  const isFilterActive = useMemo(() => Object.values(filters).some((value) => value !== ''), [filters]);
 
   // Fetch dashboard data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const endpoint = isFilterActive
-          ? API_ENDPOINTS.FILTERED
-          : API_ENDPOINTS.AGGREGATED;
+        const endpoint = isFilterActive ? API_ENDPOINTS.FILTERED : API_ENDPOINTS.AGGREGATED;
         const queryParams: Record<string, string> = { currency };
 
         if (isFilterActive) {
           Object.entries(filters)
-            .filter(([_, value]) => value !== "")
+            .filter(([_, value]) => value !== '')
             .forEach(([key, value]) => {
               queryParams[key] = value;
             });
@@ -45,7 +36,7 @@ export const useDashboardData = (
         const query = new URLSearchParams(queryParams).toString();
         const res = await fetch(`${endpoint}?${query}`);
         if (!res.ok) {
-          throw new Error("Failed to fetch data");
+          throw new Error('Failed to fetch data');
         }
         const responseData: ApiResponse = await res.json();
         setData(responseData);
@@ -54,7 +45,7 @@ export const useDashboardData = (
           toast(TOAST_CONFIG.FILTER_SUCCESS);
         }
       } catch (err) {
-        console.error("Failed to fetch aggregated data", err);
+        console.error('Failed to fetch aggregated data', err);
         toast(TOAST_CONFIG.ERROR);
       } finally {
         setLoading(false);
@@ -81,15 +72,10 @@ export const useDashboardData = (
   // Transform monthly totals
   const monthlyTotals = useMemo(() => {
     if (!data) return [];
-    const monthlyMap = new Map<
-      string,
-      { totalAmount: number; invoiceCount: number }
-    >();
+    const monthlyMap = new Map<string, { totalAmount: number; invoiceCount: number }>();
     data.monthlySummaries.forEach((item) => {
       const date = new Date(item.invoiceDate);
-      const monthKey = `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, "0")}`;
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const current = monthlyMap.get(monthKey) || {
         totalAmount: 0,
         invoiceCount: 0,
