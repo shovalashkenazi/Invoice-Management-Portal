@@ -66,8 +66,8 @@ const InvoiceStatusPieChart = ({
       justifyContent="center"
       alignItems="center"
     >
-      <Box>
-        <ResponsiveContainer width={600} height={300}>
+      <Box mt={9} w="100%" h="350px">
+        <ResponsiveContainer width="100%" height="100%">
           {/* Fixed width and height for centering */}
           <PieChart>
             <Pie

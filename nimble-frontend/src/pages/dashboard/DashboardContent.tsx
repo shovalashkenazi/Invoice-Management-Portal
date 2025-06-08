@@ -57,7 +57,6 @@ const DashboardContent = () => {
     totalsByCustomer,
     customers,
     overdueCount,
-    loading: dataLoading,
   } = useDashboardData(filters, currency, refreshTrigger);
 
   useEffect(() => {
@@ -173,14 +172,13 @@ const DashboardContent = () => {
   };
 
   return (
-    <Grid templateColumns={{ base: "1fr", md: "260px 1fr" }} gap={6} py={4}>
-      <Box
-        h="800px"
-        minHeight="800px"
-        maxHeight="800px"
-        position="sticky"
-        top="0"
-      >
+    <Grid
+      templateColumns={{ base: "1fr", md: "260px 1fr" }}
+      gap={{ base: 2, md: 6 }}
+      py={{ base: 2, md: 4 }}
+      fontFamily={"Varela Round, sans-serif"}
+    >
+      <Box w={{ base: "100%", md: "260px" }}>
         <Box mb={4}>
           <Button
             as="label"
@@ -219,6 +217,7 @@ const DashboardContent = () => {
             <option value="GBP"> GBP 💷</option>
           </Select>
         </Box>
+
         <FilterBar
           from={filters.from}
           to={filters.to}
