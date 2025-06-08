@@ -1,56 +1,46 @@
-# 📊 Nimble - Invoice Dashboard (Fullstack Assignment)
+# Getting Started with Create React App
 
-This project is a fullstack solution for managing and analyzing invoice data.  
-It includes a NestJS + PostgreSQL backend and a React + TypeScript frontend, with support for CSV import, data aggregation, filtering, and interactive visualizations.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## 🧩 Tech Stack
+## Available Scripts
 
-- **Frontend**: React, TypeScript, Chakra UI, Axios, Recharts
-- **Backend**: NestJS, Prisma ORM, PostgreSQL
-- **Dev Tools**: TO DO
-- **Testing**:TO DO
+In the project directory, you can run:
 
-## 🚀 Features
+### `npm start`
 
-### ✅ CSV Upload
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-- Upload a CSV of invoices via a dedicated API.
-- Automatically parses and normalizes data into `Invoice` and `Supplier` tables.
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-### 📈 Dashboard Visualizations
+### `npm test`
 
-- Pie chart of invoice totals by status (`CONFIRMED`, `PENDING`, `CANCELLED`)
-- Line/Area chart showing overdue invoice trends over time
-- Monthly invoice totals (bar or line)
-- Customer-wise totals (horizontal bar chart)
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### 🔍 Filtering
+### `npm run build`
 
-- Filter by:
-  - Date range
-  - Invoice status
-  - Customer
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-### ⚙️ Business Logic
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-- Invoices flagged as **Overdue** if:
-  - `invoice_due_date` has passed
-  - AND status ≠ `CONFIRMED`
-- Aggregation logic by:
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-  - Status
-  - Customer
-  - Month
+### `npm run eject`
 
-  ## 🧠 Assumptions & Decisions
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-- CSV contains only two invoice statuses: `CONFIRMED`, `CANCELLED`.  
-  A custom `PENDING` status was introduced to enable full flow per assignment instructions.
-- Mapping:
-  - `CONFIRMED` → Paid
-  - `CANCELLED` → Cancelled
-  - `PENDING` → Pending (manually introduced)
-- Overdue definition: `invoice_due_date < today` **AND** status ≠ `CONFIRMED`
-- Normalized schema: `Supplier` and `Invoice` are stored in separate tables with relations.
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-## 🛠️ Setup Instructions
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
