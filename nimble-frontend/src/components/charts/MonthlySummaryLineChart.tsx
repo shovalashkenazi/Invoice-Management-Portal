@@ -12,8 +12,10 @@ import { Box, Text } from "@chakra-ui/react";
 
 const MonthlySummaryLineChart = ({
   data,
+  currency,
 }: {
   data: { month: string; total: number }[];
+  currency: string;
 }) => {
   // Smart data filtering for better UX
   const processedData = useMemo(() => {
@@ -47,7 +49,8 @@ const MonthlySummaryLineChart = ({
             {label}
           </Text>
           <Text fontSize="sm" color="purple.600">
-            Total: ${value?.toLocaleString()}
+            Total:
+            {value?.toLocaleString(undefined, { style: "currency", currency })}
           </Text>
         </Box>
       );
@@ -57,7 +60,6 @@ const MonthlySummaryLineChart = ({
 
   // Custom X-axis label formatter
   const formatXAxisLabel = (tickItem: string) => {
-    // Show only year and month in a more readable format
     const [year, month] = tickItem.split("-");
     const monthNames = [
       "Jan",
@@ -90,7 +92,7 @@ const MonthlySummaryLineChart = ({
     );
 
   return (
-    <Box w="100%" h="300px">
+    <Box w="100%" h="350px">
       {data.length > 24 && (
         <Text fontSize="xs" color="gray.500" mb={2} textAlign="center">
           Showing recent 24 months ({processedData.length} total)
@@ -99,7 +101,7 @@ const MonthlySummaryLineChart = ({
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={processedData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+          margin={{ top: 40, right: 30, left: 20, bottom: 50 }}
         >
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
           <XAxis
@@ -113,7 +115,9 @@ const MonthlySummaryLineChart = ({
           />
           <YAxis
             tick={{ fontSize: 11 }}
-            tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            tickFormatter={(value) =>
+              value.toLocaleString(undefined, { style: "currency", currency })
+            }
           />
           <Tooltip content={<CustomTooltip />} />
           <Line

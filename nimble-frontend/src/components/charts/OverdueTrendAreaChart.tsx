@@ -107,7 +107,7 @@ const OverdueTrendAreaChart = ({
   return (
     <Box w="100%" h="300px">
       {/* Stats badges */}
-      <Box mb={2} display="flex" gap={2} flexWrap="wrap">
+      <Box mb={10} display="flex" gap={2} flexWrap="wrap">
         {stats && (
           <>
             <Badge colorScheme="red" variant="subtle" fontSize="xs">

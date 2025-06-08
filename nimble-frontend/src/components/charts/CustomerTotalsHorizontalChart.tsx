@@ -15,7 +15,13 @@ interface CustomerData {
   total: number;
 }
 
-const CustomerTotalsHorizontalChart = ({ data }: { data: CustomerData[] }) => {
+const CustomerTotalsHorizontalChart = ({
+  data,
+  currency,
+}: {
+  data: CustomerData[];
+  currency: string;
+}) => {
   // Smart data processing for better UX
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -59,7 +65,8 @@ const CustomerTotalsHorizontalChart = ({ data }: { data: CustomerData[] }) => {
             {originalData?.originalName || label}
           </Text>
           <Text fontSize="sm" color="purple.600">
-            Total: ${value?.toLocaleString()}
+            Total:{" "}
+            {value?.toLocaleString(undefined, { style: "currency", currency })}
           </Text>
         </Box>
       );
@@ -70,6 +77,16 @@ const CustomerTotalsHorizontalChart = ({ data }: { data: CustomerData[] }) => {
   // Custom Y-axis tick formatter
   const formatYAxisLabel = (tickItem: string) => {
     return tickItem; // Already truncated in processedData
+  };
+
+  // Custom X-axis formatter for shorter labels
+  const formatXAxisLabel = (value: number) => {
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `$${(value / 1000).toFixed(0)}K`;
+    }
+    return `$${value}`;
   };
 
   if (!data || data.length === 0) {
@@ -87,7 +104,9 @@ const CustomerTotalsHorizontalChart = ({ data }: { data: CustomerData[] }) => {
   }
 
   return (
-    <Box w="100%" h="300px">
+    <Box w="100%" h="350px">
+      {" "}
+      {/* Increased height to accommodate currency badge */}
       <Flex justify="space-between" align="center" mb={2}>
         {data.length > 10 && (
           <Badge colorScheme="purple" variant="subtle" fontSize="xs">
@@ -100,18 +119,18 @@ const CustomerTotalsHorizontalChart = ({ data }: { data: CustomerData[] }) => {
           </Badge>
         )}
       </Flex>
-
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           layout="vertical"
           data={processedData}
-          margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+          margin={{ top: 10, right: 30, left: 10, bottom: 30 }}
         >
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
           <XAxis
             type="number"
             tick={{ fontSize: 11 }}
-            tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            tickFormatter={formatXAxisLabel}
+            height={40}
           />
           <YAxis
             type="category"

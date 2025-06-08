@@ -9,10 +9,35 @@ import {
 } from "recharts";
 import { Box, Text } from "@chakra-ui/react";
 
+const CustomTooltip = ({
+  active,
+  payload,
+  currency,
+}: {
+  active?: boolean;
+  payload?: any;
+  currency: string;
+}) => {
+  if (active && payload && payload.length) {
+    return (
+      <Box bg="white" p={2} border="1px solid #ccc" borderRadius={4}>
+        <Text>{`Status: ${payload[0].payload.status}`}</Text>
+        <Text>{`Total: ${payload[0].value.toLocaleString(undefined, {
+          style: "currency",
+          currency,
+        })}`}</Text>
+      </Box>
+    );
+  }
+  return null;
+};
+
 const InvoiceStatusBarChart = ({
   data,
+  currency,
 }: {
   data: { status: string; total: number }[];
+  currency: string;
 }) => {
   if (!data?.length)
     return (
@@ -28,16 +53,22 @@ const InvoiceStatusBarChart = ({
     );
 
   return (
-    <Box mt={9} w="100%" h="300px">
+    <Box mt={9} w="100%" h="350px">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}
-          margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+          margin={{ top: 40, right: 30, left: 80, bottom: 50 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="status" tick={{ fontSize: 12 }} height={50} />
-          <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip />
+          <YAxis
+            tickFormatter={(value) =>
+              value.toLocaleString(undefined, { style: "currency", currency })
+            }
+            tick={{ fontSize: 12 }}
+            width={70}
+          />
+          <Tooltip content={<CustomTooltip currency={currency} />} />
           <Bar dataKey="total" fill="#6B46C1" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>

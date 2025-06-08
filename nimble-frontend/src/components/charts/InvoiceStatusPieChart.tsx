@@ -15,7 +15,36 @@ interface PieData {
 
 const COLORS = ["#6B46C1", "#ED8936", "#E53E3E"];
 
-const InvoiceStatusPieChart = ({ data }: { data: PieData[] }) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  currency,
+}: {
+  active?: boolean;
+  payload?: any;
+  currency: string;
+}) => {
+  if (active && payload && payload.length) {
+    return (
+      <Box bg="white" p={2} border="1px solid #ccc" borderRadius={4}>
+        <Text>{`Status: ${payload[0].payload.status}`}</Text>
+        <Text>{`Total: ${payload[0].value.toLocaleString(undefined, {
+          style: "currency",
+          currency,
+        })}`}</Text>
+      </Box>
+    );
+  }
+  return null;
+};
+
+const InvoiceStatusPieChart = ({
+  data,
+  currency,
+}: {
+  data: PieData[];
+  currency: string;
+}) => {
   if (!data || data.length === 0)
     return (
       <Box
@@ -30,34 +59,56 @@ const InvoiceStatusPieChart = ({ data }: { data: PieData[] }) => {
     );
 
   return (
-    <Box w="100%" h="300px">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            dataKey="total"
-            nameKey="status"
-            data={data}
-            cx="50%"
-            cy="45%"
-            outerRadius={80}
-            fill="#8884d8"
-            label
-          >
-            {data.map((_, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
-              />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend
-            verticalAlign="bottom"
-            height={36}
-            wrapperStyle={{ paddingTop: "10px" }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <Box
+      w="100%"
+      h="350px"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+    >
+      <Box>
+        <ResponsiveContainer width={400} height={300}>
+          {/* Fixed width and height for centering */}
+          <PieChart>
+            <Pie
+              dataKey="total"
+              nameKey="status"
+              data={data}
+              cx="50%" // Centered horizontally within the fixed width
+              cy="50%" // Centered vertically within the fixed height
+              outerRadius={100} // Adjusted radius for better fit
+              fill="#8884d8"
+              label={({ value }) =>
+                value.toLocaleString(undefined, {
+                  style: "currency",
+                  currency,
+                })
+              }
+            >
+              {data.map((_, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip currency={currency} />} />
+            <Legend
+              verticalAlign="middle"
+              align="left"
+              layout="vertical"
+              width={150}
+              wrapperStyle={{
+                paddingLeft: "10px",
+                position: "absolute",
+                left: 0,
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </Box>
     </Box>
   );
 };

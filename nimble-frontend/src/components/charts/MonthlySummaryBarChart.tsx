@@ -15,7 +15,13 @@ interface MonthlyData {
   total: number;
 }
 
-const MonthlySummaryBarChart = ({ data }: { data: MonthlyData[] }) => {
+const MonthlySummaryBarChart = ({
+  data,
+  currency,
+}: {
+  data: MonthlyData[];
+  currency: string;
+}) => {
   // Smart data filtering for better UX
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -48,7 +54,8 @@ const MonthlySummaryBarChart = ({ data }: { data: MonthlyData[] }) => {
             {label}
           </Text>
           <Text fontSize="sm" color="purple.600">
-            Total: ${value?.toLocaleString()}
+            Total:{" "}
+            {value?.toLocaleString(undefined, { style: "currency", currency })}
           </Text>
         </Box>
       );
@@ -58,7 +65,6 @@ const MonthlySummaryBarChart = ({ data }: { data: MonthlyData[] }) => {
 
   // Custom X-axis label formatter
   const formatXAxisLabel = (tickItem: string) => {
-    // Show only year and month in a more readable format
     const [year, month] = tickItem.split("-");
     const monthNames = [
       "Jan",
@@ -92,7 +98,9 @@ const MonthlySummaryBarChart = ({ data }: { data: MonthlyData[] }) => {
   }
 
   return (
-    <Box w="100%" h="300px">
+    <Box w="100%" h="350px">
+      {" "}
+      {/* Increased height to accommodate currency text */}
       {data.length > 24 && (
         <Text fontSize="xs" color="gray.500" mb={2} textAlign="center">
           Showing recent 24 months ({processedData.length} total)
@@ -101,7 +109,7 @@ const MonthlySummaryBarChart = ({ data }: { data: MonthlyData[] }) => {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={processedData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+          margin={{ top: 40, right: 30, left: 20, bottom: 50 }}
         >
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
           <XAxis
@@ -115,7 +123,9 @@ const MonthlySummaryBarChart = ({ data }: { data: MonthlyData[] }) => {
           />
           <YAxis
             tick={{ fontSize: 11 }}
-            tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            tickFormatter={(value) =>
+              value.toLocaleString(undefined, { style: "currency", currency })
+            }
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar
