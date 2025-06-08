@@ -6,9 +6,12 @@ import {
   UploadedFile,
   Query,
   ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InvoicesService } from './invoices.service';
+import { FilterDto } from './filter.dto';
 
 @Controller('invoices')
 export class InvoicesController {
@@ -24,39 +27,24 @@ export class InvoicesController {
   }
 
   @Get('aggregated')
-  async getAggregated() {
-    return this.invoicesService.getAggregatedData();
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getAggregated(@Query() filters: FilterDto) {
+    return this.invoicesService.getAggregatedData(filters);
   }
 
   @Get('filtered')
-  async getFilteredData(
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Query('status') status?: string,
-    @Query('customer') customer?: string,
-  ) {
-    return this.invoicesService.getFilteredData({
-      from,
-      to,
-      status,
-      customer,
-    });
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getFilteredData(@Query() filters: FilterDto) {
+    return this.invoicesService.getFilteredData(filters);
   }
 
   @Get()
+  @UsePipes(new ValidationPipe({ transform: true }))
   async getInvoices(
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('limit', ParseIntPipe) limit: number = 20,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Query('status') status?: string,
-    @Query('customer') customer?: string,
+    @Query() filters: FilterDto,
   ) {
-    return this.invoicesService.getInvoices(page, limit, {
-      from,
-      to,
-      status,
-      customer,
-    });
+    return this.invoicesService.getInvoices(page, limit, filters);
   }
 }
