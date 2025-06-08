@@ -38,13 +38,13 @@ interface DashboardData {
   totalsByCustomer: CustomerData[];
   customers: { id: string; companyName: string }[];
   overdueCount: number;
-  activeCustomersCount: number;
   loading: boolean;
 }
 
 export const useDashboardData = (
   filters: FilterState,
-  currency: "USD" | "EUR" | "GBP"
+  currency: "USD" | "EUR" | "GBP",
+  refreshTrigger: number // Added to trigger re-fetch
 ): DashboardData => {
   const toast = useToast();
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,6 @@ export const useDashboardData = (
     { id: string; companyName: string }[]
   >([]);
   const [overdueCount, setOverdueCount] = useState<number>(0);
-  const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0);
 
   const isFilterActive = Object.values(filters).some((value) => value !== "");
 
@@ -89,7 +88,7 @@ export const useDashboardData = (
         const transformedStatusData = Array.from(statusMap.entries()).map(
           ([status, total]) => ({
             status,
-            total: Number(total.toFixed(2)), // Round to 2 decimal places
+            total: Number(total.toFixed(2)),
           })
         );
 
@@ -115,7 +114,7 @@ export const useDashboardData = (
         const transformedMonthlyData = Array.from(monthlyMap.entries())
           .map(([month, data]) => ({
             month,
-            total: Number(data.totalAmount.toFixed(2)), // Round to 2 decimal places
+            total: Number(data.totalAmount.toFixed(2)),
             count: data.invoiceCount,
           }))
           .sort((a, b) => a.month.localeCompare(b.month));
@@ -124,19 +123,18 @@ export const useDashboardData = (
           data.overdueTrend?.map((item: any) => ({
             date: item.month,
             count: item.count || 0,
-            total: Number((item.total || 0).toFixed(2)), // Round to 2 decimal places
+            total: Number((item.total || 0).toFixed(2)),
           })) || [];
 
         const transformedCustomerData =
           data.totalsByCustomer?.map((item: any) => ({
             name: item.supplier?.companyName || `Customer ${item.supplierId}`,
-            total: Number((item._sum?.cost || 0).toFixed(2)), // Round to 2 decimal places
+            total: Number((item._sum?.cost || 0).toFixed(2)),
             count: item._count?.id || 0,
           })) || [];
 
         setTotalsByStatus(transformedStatusData);
         setOverdueCount(data.overdueInvoiceCounts || 0);
-        setActiveCustomersCount(data.activeCustomersCount || 0);
         setMonthlyTotals(transformedMonthlyData);
         setOverdueTrend(transformedOverdueData);
         setTotalsByCustomer(transformedCustomerData);
@@ -166,7 +164,7 @@ export const useDashboardData = (
     };
 
     fetchData();
-  }, [filters, currency, toast]);
+  }, [filters, currency, refreshTrigger]); // Added refreshTrigger as dependency
 
   return {
     totalsByStatus,
@@ -175,7 +173,6 @@ export const useDashboardData = (
     totalsByCustomer,
     customers,
     overdueCount,
-    activeCustomersCount,
     loading,
   };
 };

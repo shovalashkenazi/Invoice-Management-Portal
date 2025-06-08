@@ -11,34 +11,6 @@ import {
 } from "@chakra-ui/react";
 
 const Navbar = () => {
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch("http://localhost:3000/invoices/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        alert("CSV uploaded successfully!");
-      } else {
-        const error = await res.text();
-        alert("Upload failed: " + error);
-      }
-    } catch (err) {
-      alert("Error uploading CSV");
-      console.error(err);
-    } finally {
-      // מאפס את ה-input אחרי כל העלאה
-      e.target.value = "";
-    }
-  };
-
   return (
     <Box
       fontFamily="Varela Round, sans-serif"
@@ -78,35 +50,6 @@ const Navbar = () => {
 
         {/* Actions */}
         <Flex align="center" gap={3}>
-          {/* Upload CSV Button */}
-          <input
-            type="file"
-            accept=".csv"
-            id="csv-upload"
-            style={{ display: "none" }}
-            onChange={handleFileUpload}
-          />
-          <label htmlFor="csv-upload">
-            <Tooltip label="Upload CSV">
-              <Text
-                as="span"
-                fontSize="sm"
-                color="gray.600"
-                ml={1}
-                display={{ base: "none", md: "inline" }}
-              >
-                Upload CSV
-              </Text>{" "}
-              <IconButton
-                as="span"
-                icon={<Text fontSize="sm">📤</Text>}
-                aria-label="Upload CSV"
-                variant="ghost"
-                size="sm"
-              />
-            </Tooltip>
-          </label>
-
           <Divider orientation="vertical" height="20px" />
 
           <Tooltip label="Help">

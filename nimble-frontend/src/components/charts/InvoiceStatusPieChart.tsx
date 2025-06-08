@@ -67,7 +67,7 @@ const InvoiceStatusPieChart = ({
       alignItems="center"
     >
       <Box>
-        <ResponsiveContainer width={400} height={300}>
+        <ResponsiveContainer width={600} height={300}>
           {/* Fixed width and height for centering */}
           <PieChart>
             <Pie
@@ -102,7 +102,7 @@ const InvoiceStatusPieChart = ({
                 paddingLeft: "10px",
                 position: "absolute",
                 left: 0,
-                top: "50%",
+                top: "40%",
                 transform: "translateY(-50%)",
               }}
             />

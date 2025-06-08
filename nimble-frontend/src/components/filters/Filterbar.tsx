@@ -1,9 +1,7 @@
-// components/layout/FilterBar.tsx
 import {
   Box,
   FormControl,
   FormLabel,
-  Input,
   Select,
   VStack,
   Text,
@@ -36,6 +34,18 @@ const FilterBar = ({
   customers,
   onChange,
 }: Props) => {
+  // Generate years range (e.g., 2020-2025)
+  const years = Array.from({ length: 2025 - 2020 + 1 }, (_, i) => 2020 + i).map(
+    (year) => year.toString()
+  );
+  years.unshift("All");
+
+  // Months array
+  const months = Array.from({ length: 12 }, (_, i) =>
+    (i + 1).toString().padStart(2, "0")
+  );
+  months.unshift("All");
+
   return (
     <Box
       w={{ base: "100%", md: "260px" }}
@@ -43,10 +53,13 @@ const FilterBar = ({
       bg="white"
       borderRight="1px solid"
       borderColor="gray.200"
-      h="full"
+      h="800px"
+      minHeight="800px"
+      maxHeight="800px"
       position="sticky"
-      borderRadius="xl"
       top="0"
+      overflowY="auto"
+      borderRadius="xl"
     >
       <Text fontSize="lg" fontWeight="bold" mb={4}>
         Filters
@@ -54,25 +67,81 @@ const FilterBar = ({
 
       <VStack spacing={4} align="stretch">
         <FormControl>
-          <FormLabel>From</FormLabel>
-          <Input
-            type="date"
-            value={from}
-            onChange={(e) =>
-              onChange({ from: e.target.value, to, status, customer })
-            }
-          />
+          <FormLabel>From Year</FormLabel>
+          <Select
+            value={from.split("-")[0] || "All"}
+            onChange={(e) => {
+              const year =
+                e.target.value === "All" ? "" : `${e.target.value}-01`;
+              onChange({ from: year, to, status, customer });
+            }}
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </Select>
         </FormControl>
 
         <FormControl>
-          <FormLabel>To</FormLabel>
-          <Input
-            type="date"
-            value={to}
-            onChange={(e) =>
-              onChange({ from, to: e.target.value, status, customer })
-            }
-          />
+          <FormLabel>From Month</FormLabel>
+          <Select
+            value={from.split("-")[1] || "All"}
+            onChange={(e) => {
+              const year =
+                from.split("-")[0] || new Date().getFullYear().toString();
+              const month = e.target.value === "All" ? "" : e.target.value;
+              const newFrom = month ? `${year}-${month}` : year;
+              onChange({ from: newFrom, to, status, customer });
+            }}
+            isDisabled={!from || from === "All"}
+          >
+            {months.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>To Year</FormLabel>
+          <Select
+            value={to.split("-")[0] || "All"}
+            onChange={(e) => {
+              const year =
+                e.target.value === "All" ? "" : `${e.target.value}-12`;
+              onChange({ from, to: year, status, customer });
+            }}
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>To Month</FormLabel>
+          <Select
+            value={to.split("-")[1] || "All"}
+            onChange={(e) => {
+              const year =
+                to.split("-")[0] || new Date().getFullYear().toString();
+              const month = e.target.value === "All" ? "" : e.target.value;
+              const newTo = month ? `${year}-${month}` : year;
+              onChange({ from, to: newTo, status, customer });
+            }}
+            isDisabled={!to || to === "All"}
+          >
+            {months.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))}
+          </Select>
         </FormControl>
 
         <FormControl>
@@ -86,6 +155,7 @@ const FilterBar = ({
           >
             <option value="CONFIRMED">CONFIRMED</option>
             <option value="CANCELLED">CANCELLED</option>
+            <option value="PENDING">PENDING</option>
           </Select>
         </FormControl>
 
