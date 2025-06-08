@@ -5,65 +5,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@chakra-ui/react";
 
 // Types
-import {
-  CustomerData,
-  FilterState,
-  MonthlyData,
-  OverdueData,
-  StatusData,
-} from "../types";
-
-// === Data Interfaces ===
-interface DashboardData {
-  totalsByStatus: StatusData[];
-  overdueTrend: OverdueData[];
-  monthlyTotals: MonthlyData[];
-  totalsByCustomer: CustomerData[];
-  customers: { id: string; companyName: string }[];
-  overdueCount: number;
-  loading: boolean;
-}
-
-interface ApiResponse {
-  totalsByStatus: { status: string; _sum: { cost: number } }[];
-  monthlySummaries: {
-    invoiceDate: string;
-    _sum: { cost: number };
-    _count: { id: number };
-  }[];
-  overdueTrend: { month: string; count: number; total: number }[];
-  totalsByCustomer: {
-    supplierId: string;
-    supplier?: { companyName: string };
-    _sum: { cost: number };
-    _count: { id: number };
-  }[];
-  customers: { id: string; companyName: string }[];
-  overdueInvoiceCounts: number;
-}
-
-// === Constants ===
-const API_ENDPOINTS = {
-  AGGREGATED: "http://localhost:3000/invoices/aggregated",
-  FILTERED: "http://localhost:3000/invoices/filtered",
-} as const;
-
-const TOAST_CONFIG = {
-  FILTER_SUCCESS: {
-    title: "Filters Applied",
-    description: "Dashboard updated with filtered data",
-    status: "success" as const,
-    duration: 2000,
-    isClosable: true,
-  },
-  ERROR: {
-    title: "Error",
-    description: "Failed to fetch dashboard data",
-    status: "error" as const,
-    duration: 3000,
-    isClosable: true,
-  },
-};
+import { ApiResponse, DashboardData, FilterState } from "../types";
+import { API_ENDPOINTS, TOAST_CONFIG } from "../constants";
 
 // === Custom Hook ===
 export const useDashboardData = (

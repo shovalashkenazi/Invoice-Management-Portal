@@ -1,30 +1,16 @@
 // React hooks
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 
 // Recharts components
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // Chakra UI components
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Text } from '@chakra-ui/react';
 
 // Types
-import { MonthlyData } from "../../types";
+import { MonthlyData } from '../../types';
 
-const MonthlySummaryBarChart = ({
-  data,
-  currency,
-}: {
-  data: MonthlyData[];
-  currency: string;
-}) => {
+const MonthlySummaryBarChart = ({ data, currency }: { data: MonthlyData[]; currency: string }) => {
   // Smart data filtering for better UX
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -45,20 +31,12 @@ const MonthlySummaryBarChart = ({
     if (active && payload && payload.length) {
       const value = payload[0].value;
       return (
-        <Box
-          bg="white"
-          p={3}
-          border="1px solid"
-          borderColor="gray.200"
-          borderRadius="md"
-          boxShadow="md"
-        >
+        <Box bg="white" p={3} border="1px solid" borderColor="gray.200" borderRadius="md" boxShadow="md">
           <Text fontSize="sm" fontWeight="medium">
             {label}
           </Text>
           <Text fontSize="sm" color="purple.600">
-            Total:{" "}
-            {value?.toLocaleString(undefined, { style: "currency", currency })}
+            Total: {value?.toLocaleString(undefined, { style: 'currency', currency })}
           </Text>
         </Box>
       );
@@ -68,33 +46,14 @@ const MonthlySummaryBarChart = ({
 
   // Custom X-axis label formatter
   const formatXAxisLabel = (tickItem: string) => {
-    const [year, month] = tickItem.split("-");
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+    const [year, month] = tickItem.split('-');
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[parseInt(month) - 1]} ${year.slice(-2)}`;
   };
 
   if (!data || data.length === 0) {
     return (
-      <Box
-        w="100%"
-        h="300px"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
+      <Box w="100%" h="300px" display="flex" alignItems="center" justifyContent="center">
         <Text color="gray.400">No monthly data available</Text>
       </Box>
     );
@@ -108,10 +67,7 @@ const MonthlySummaryBarChart = ({
         </Text>
       )}
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={processedData}
-          margin={{ top: 40, right: 30, left: 20, bottom: 50 }}
-        >
+        <BarChart data={processedData} margin={{ top: 40, right: 30, left: 20, bottom: 50 }}>
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
           <XAxis
             dataKey="month"
@@ -122,19 +78,9 @@ const MonthlySummaryBarChart = ({
             height={60}
             interval={Math.max(0, Math.floor(processedData.length / 12))}
           />
-          <YAxis
-            tick={{ fontSize: 11 }}
-            tickFormatter={(value) =>
-              value.toLocaleString(undefined, { style: "currency", currency })
-            }
-          />
+          <YAxis tick={{ fontSize: 11 }} tickFormatter={(value) => value.toLocaleString(undefined, { style: 'currency', currency })} />
           <Tooltip content={<CustomTooltip />} />
-          <Bar
-            dataKey="total"
-            fill="#6B46C1"
-            radius={[4, 4, 0, 0]}
-            maxBarSize={50}
-          />
+          <Bar dataKey="total" fill="#6B46C1" radius={[4, 4, 0, 0]} maxBarSize={50} />
         </BarChart>
       </ResponsiveContainer>
     </Box>
@@ -142,8 +88,5 @@ const MonthlySummaryBarChart = ({
 };
 
 export default React.memo(MonthlySummaryBarChart, (prevProps, nextProps) => {
-  return (
-    JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) &&
-    prevProps.currency === nextProps.currency
-  );
+  return JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) && prevProps.currency === nextProps.currency;
 });

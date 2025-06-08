@@ -1,22 +1,14 @@
 // React hooks
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 
 // Recharts components
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // Chakra UI components
-import { Badge, Box, Text } from "@chakra-ui/react";
+import { Badge, Box, Text } from '@chakra-ui/react';
 
 // Types
-import { OverdueData } from "../../types";
+import { OverdueData } from '../../types';
 
 const OverdueTrendAreaChart = ({ data }: { data: OverdueData[] }) => {
   // Smart data processing for better readability
@@ -41,19 +33,12 @@ const OverdueTrendAreaChart = ({ data }: { data: OverdueData[] }) => {
       const formattedDate = formatDateLabel(label);
 
       return (
-        <Box
-          bg="white"
-          p={3}
-          border="1px solid"
-          borderColor="gray.200"
-          borderRadius="md"
-          boxShadow="md"
-        >
+        <Box bg="white" p={3} border="1px solid" borderColor="gray.200" borderRadius="md" boxShadow="md">
           <Text fontSize="sm" fontWeight="medium" mb={1}>
             {formattedDate}
           </Text>
           <Text fontSize="sm" color="red.600">
-            {count} overdue invoice{count !== 1 ? "s" : ""}
+            {count} overdue invoice{count !== 1 ? 's' : ''}
           </Text>
         </Box>
       );
@@ -63,21 +48,8 @@ const OverdueTrendAreaChart = ({ data }: { data: OverdueData[] }) => {
 
   // Format date labels (YYYY-MM to "Jan 2024")
   const formatDateLabel = (dateStr: string) => {
-    const [year, month] = dateStr.split("-");
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+    const [year, month] = dateStr.split('-');
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
 
@@ -85,10 +57,7 @@ const OverdueTrendAreaChart = ({ data }: { data: OverdueData[] }) => {
   const stats = useMemo(() => {
     if (!processedData.length) return null;
 
-    const totalOverdue = processedData.reduce(
-      (sum, item) => sum + item.count,
-      0
-    );
+    const totalOverdue = processedData.reduce((sum, item) => sum + item.count, 0);
     const avgOverdue = Math.round(totalOverdue / processedData.length);
     const maxOverdue = Math.max(...processedData.map((item) => item.count));
 
@@ -97,13 +66,7 @@ const OverdueTrendAreaChart = ({ data }: { data: OverdueData[] }) => {
 
   if (!data?.length)
     return (
-      <Box
-        w="100%"
-        h="300px"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
+      <Box w="100%" h="300px" display="flex" alignItems="center" justifyContent="center">
         <Text color="gray.400">No trend data available</Text>
       </Box>
     );
@@ -130,10 +93,7 @@ const OverdueTrendAreaChart = ({ data }: { data: OverdueData[] }) => {
       </Box>
 
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={processedData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
-        >
+        <AreaChart data={processedData} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
           <XAxis
             dataKey="date"
@@ -148,20 +108,14 @@ const OverdueTrendAreaChart = ({ data }: { data: OverdueData[] }) => {
             allowDecimals={false}
             tick={{ fontSize: 11 }}
             label={{
-              value: "Overdue Count",
+              value: 'Overdue Count',
               angle: -90,
-              position: "insideLeft",
-              style: { textAnchor: "middle", fontSize: 12, fill: "#4A5568" },
+              position: 'insideLeft',
+              style: { textAnchor: 'middle', fontSize: 12, fill: '#4A5568' },
             }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Area
-            type="monotone"
-            dataKey="count"
-            stroke="#DC2626"
-            strokeWidth={3}
-            fill="url(#overdueGradient)"
-          />
+          <Area type="monotone" dataKey="count" stroke="#DC2626" strokeWidth={3} fill="url(#overdueGradient)" />
           <defs>
             <linearGradient id="overdueGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#DC2626" stopOpacity={0.3} />

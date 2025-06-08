@@ -1,30 +1,16 @@
 // React hooks
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 
 // Recharts components
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // Chakra UI components
-import { Badge, Box, Flex, Text } from "@chakra-ui/react";
+import { Badge, Box, Flex, Text } from '@chakra-ui/react';
 
 // Types
-import { CustomerData } from "../../types";
+import { CustomerData } from '../../types';
 
-const CustomerTotalsHorizontalChart = ({
-  data,
-  currency,
-}: {
-  data: CustomerData[];
-  currency: string;
-}) => {
+const CustomerTotalsHorizontalChart = ({ data, currency }: { data: CustomerData[]; currency: string }) => {
   // Smart data processing for better UX
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -38,10 +24,7 @@ const CustomerTotalsHorizontalChart = ({
     // Truncate long customer names
     return topCustomers.map((customer) => ({
       ...customer,
-      displayName:
-        customer.name.length > 25
-          ? customer.name.substring(0, 22) + "..."
-          : customer.name,
+      displayName: customer.name.length > 25 ? customer.name.substring(0, 22) + '...' : customer.name,
       originalName: customer.name,
     }));
   }, [data]);
@@ -50,26 +33,15 @@ const CustomerTotalsHorizontalChart = ({
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const value = payload[0].value;
-      const originalData = processedData.find(
-        (item) => item.displayName === label
-      );
+      const originalData = processedData.find((item) => item.displayName === label);
 
       return (
-        <Box
-          bg="white"
-          p={3}
-          border="1px solid"
-          borderColor="gray.200"
-          borderRadius="md"
-          boxShadow="md"
-          maxW="300px"
-        >
+        <Box bg="white" p={3} border="1px solid" borderColor="gray.200" borderRadius="md" boxShadow="md" maxW="300px">
           <Text fontSize="sm" fontWeight="medium" mb={1}>
             {originalData?.originalName || label}
           </Text>
           <Text fontSize="sm" color="purple.600">
-            Total:{" "}
-            {value?.toLocaleString(undefined, { style: "currency", currency })}
+            Total: {value?.toLocaleString(undefined, { style: 'currency', currency })}
           </Text>
         </Box>
       );
@@ -94,13 +66,7 @@ const CustomerTotalsHorizontalChart = ({
 
   if (!data || data.length === 0) {
     return (
-      <Box
-        w="100%"
-        h="300px"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
+      <Box w="100%" h="300px" display="flex" alignItems="center" justifyContent="center">
         <Text color="gray.400">No customer data available</Text>
       </Box>
     );
@@ -116,49 +82,23 @@ const CustomerTotalsHorizontalChart = ({
         )}
         {data.length <= 10 && (
           <Badge colorScheme="gray" variant="subtle" fontSize="xs">
-            {data.length} customer{data.length !== 1 ? "s" : ""}
+            {data.length} customer{data.length !== 1 ? 's' : ''}
           </Badge>
         )}
       </Flex>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          layout="vertical"
-          data={processedData}
-          margin={{ top: 10, right: 30, left: 10, bottom: 30 }}
-        >
+        <BarChart layout="vertical" data={processedData} margin={{ top: 10, right: 30, left: 10, bottom: 30 }}>
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-          <XAxis
-            type="number"
-            tick={{ fontSize: 11 }}
-            tickFormatter={formatXAxisLabel}
-            height={40}
-          />
-          <YAxis
-            type="category"
-            dataKey="displayName"
-            tick={{ fontSize: 11 }}
-            tickFormatter={formatYAxisLabel}
-            width={120}
-          />
+          <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={formatXAxisLabel} height={40} />
+          <YAxis type="category" dataKey="displayName" tick={{ fontSize: 11 }} tickFormatter={formatYAxisLabel} width={120} />
           <Tooltip content={<CustomTooltip />} />
-          <Bar
-            dataKey="total"
-            fill="#6B46C1"
-            radius={[0, 4, 4, 0]}
-            maxBarSize={25}
-          />
+          <Bar dataKey="total" fill="#6B46C1" radius={[0, 4, 4, 0]} maxBarSize={25} />
         </BarChart>
       </ResponsiveContainer>
     </Box>
   );
 };
 
-export default React.memo(
-  CustomerTotalsHorizontalChart,
-  (prevProps, nextProps) => {
-    return (
-      JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) &&
-      prevProps.currency === nextProps.currency
-    );
-  }
-);
+export default React.memo(CustomerTotalsHorizontalChart, (prevProps, nextProps) => {
+  return JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) && prevProps.currency === nextProps.currency;
+});

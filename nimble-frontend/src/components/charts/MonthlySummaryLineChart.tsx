@@ -1,23 +1,9 @@
-import { useMemo } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
-import { Box, Text } from "@chakra-ui/react";
-import { MonthlyData } from "../../types";
+import { useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { Box, Text } from '@chakra-ui/react';
+import { MonthlyData } from '../../types';
 
-const MonthlySummaryLineChart = ({
-  data,
-  currency,
-}: {
-  data: MonthlyData[];
-  currency: string;
-}) => {
+const MonthlySummaryLineChart = ({ data, currency }: { data: MonthlyData[]; currency: string }) => {
   // Smart data filtering for better UX
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -38,20 +24,13 @@ const MonthlySummaryLineChart = ({
     if (active && payload && payload.length) {
       const value = payload[0].value;
       return (
-        <Box
-          bg="white"
-          p={3}
-          border="1px solid"
-          borderColor="gray.200"
-          borderRadius="md"
-          boxShadow="md"
-        >
+        <Box bg="white" p={3} border="1px solid" borderColor="gray.200" borderRadius="md" boxShadow="md">
           <Text fontSize="sm" fontWeight="medium">
             {label}
           </Text>
           <Text fontSize="sm" color="purple.600">
             Total:
-            {value?.toLocaleString(undefined, { style: "currency", currency })}
+            {value?.toLocaleString(undefined, { style: 'currency', currency })}
           </Text>
         </Box>
       );
@@ -61,33 +40,14 @@ const MonthlySummaryLineChart = ({
 
   // Custom X-axis label formatter
   const formatXAxisLabel = (tickItem: string) => {
-    const [year, month] = tickItem.split("-");
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+    const [year, month] = tickItem.split('-');
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[parseInt(month) - 1]} ${year.slice(-2)}`;
   };
 
   if (!data?.length)
     return (
-      <Box
-        w="100%"
-        h="300px"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
+      <Box w="100%" h="300px" display="flex" alignItems="center" justifyContent="center">
         <Text color="gray.400">No monthly data available</Text>
       </Box>
     );
@@ -100,10 +60,7 @@ const MonthlySummaryLineChart = ({
         </Text>
       )}
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={processedData}
-          margin={{ top: 40, right: 30, left: 20, bottom: 50 }}
-        >
+        <LineChart data={processedData} margin={{ top: 40, right: 30, left: 20, bottom: 50 }}>
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
           <XAxis
             dataKey="month"
@@ -114,21 +71,9 @@ const MonthlySummaryLineChart = ({
             height={60}
             interval={Math.max(0, Math.floor(processedData.length / 12))}
           />
-          <YAxis
-            tick={{ fontSize: 11 }}
-            tickFormatter={(value) =>
-              value.toLocaleString(undefined, { style: "currency", currency })
-            }
-          />
+          <YAxis tick={{ fontSize: 11 }} tickFormatter={(value) => value.toLocaleString(undefined, { style: 'currency', currency })} />
           <Tooltip content={<CustomTooltip />} />
-          <Line
-            type="monotone"
-            dataKey="total"
-            stroke="#6B46C1"
-            strokeWidth={3}
-            dot={{ r: 3, fill: "#6B46C1" }}
-            activeDot={{ r: 6, fill: "#6B46C1" }}
-          />
+          <Line type="monotone" dataKey="total" stroke="#6B46C1" strokeWidth={3} dot={{ r: 3, fill: '#6B46C1' }} activeDot={{ r: 6, fill: '#6B46C1' }} />
         </LineChart>
       </ResponsiveContainer>
     </Box>

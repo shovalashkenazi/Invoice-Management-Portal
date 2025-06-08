@@ -11,45 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-
-interface Customer {
-  id: string;
-  companyName: string;
-}
-
-interface FilterState {
-  from: string;
-  to: string;
-  status: string;
-  customer: string;
-}
-
-interface Props {
-  from: string;
-  to: string;
-  status: string;
-  customer: string;
-  customers: Customer[];
-  onChange: <K extends keyof FilterState>(
-    key: K,
-    value: FilterState[K]
-  ) => void;
-}
-
-// Constants for maintainability
-const START_YEAR = 2020;
-const END_YEAR = 2025;
-const MONTHS = Array.from({ length: 12 }, (_, i) =>
-  (i + 1).toString().padStart(2, "0")
-).concat("All");
-const YEARS = Array.from(
-  { length: END_YEAR - START_YEAR + 1 },
-  (_, i) => START_YEAR + i
-)
-  .map((year) => year.toString())
-  .concat("All")
-  .reverse(); // Latest years first
-const STATUSES = ["CONFIRMED", "CANCELLED", "PENDING"];
+import { FilterBarProps } from "../../types";
+import { MONTHS, STATUSES, YEARS } from "../../constants";
 
 const FilterBar = ({
   from,
@@ -58,7 +21,7 @@ const FilterBar = ({
   customer,
   customers,
   onChange,
-}: Props) => {
+}: FilterBarProps) => {
   const [isOpen, setIsOpen] = useState(true);
   const isMobile = useBreakpointValue({ base: true, md: false });
 
