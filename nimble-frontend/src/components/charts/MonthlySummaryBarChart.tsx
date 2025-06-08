@@ -1,19 +1,22 @@
-import { useMemo } from "react";
+// React hooks
+import React, { useMemo } from "react";
+
+// Recharts components
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
+  BarChart,
   CartesianGrid,
   ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
+
+// Chakra UI components
 import { Box, Text } from "@chakra-ui/react";
 
-interface MonthlyData {
-  month: string;
-  total: number;
-}
+// Types
+import { MonthlyData } from "../../types";
 
 const MonthlySummaryBarChart = ({
   data,
@@ -99,8 +102,6 @@ const MonthlySummaryBarChart = ({
 
   return (
     <Box w="100%" h="350px">
-      {" "}
-      {/* Increased height to accommodate currency text */}
       {data.length > 24 && (
         <Text fontSize="xs" color="gray.500" mb={2} textAlign="center">
           Showing recent 24 months ({processedData.length} total)
@@ -140,4 +141,9 @@ const MonthlySummaryBarChart = ({
   );
 };
 
-export default MonthlySummaryBarChart;
+export default React.memo(MonthlySummaryBarChart, (prevProps, nextProps) => {
+  return (
+    JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) &&
+    prevProps.currency === nextProps.currency
+  );
+});

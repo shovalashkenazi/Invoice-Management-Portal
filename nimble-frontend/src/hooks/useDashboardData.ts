@@ -1,36 +1,19 @@
+// React hooks
 import { useState, useEffect, useMemo } from "react";
+
+// Chakra UI hooks
 import { useToast } from "@chakra-ui/react";
 
-interface StatusData {
-  status: string;
-  total: number;
-}
+// Types
+import {
+  CustomerData,
+  FilterState,
+  MonthlyData,
+  OverdueData,
+  StatusData,
+} from "../types";
 
-interface MonthlyData {
-  month: string;
-  total: number;
-  count: number;
-}
-
-interface OverdueData {
-  date: string;
-  count: number;
-  total: number;
-}
-
-interface CustomerData {
-  name: string;
-  total: number;
-  count: number;
-}
-
-interface FilterState {
-  from: string;
-  to: string;
-  status: string;
-  customer: string;
-}
-
+// === Data Interfaces ===
 interface DashboardData {
   totalsByStatus: StatusData[];
   overdueTrend: OverdueData[];
@@ -41,7 +24,6 @@ interface DashboardData {
   loading: boolean;
 }
 
-// API response type for better type safety
 interface ApiResponse {
   totalsByStatus: { status: string; _sum: { cost: number } }[];
   monthlySummaries: {
@@ -60,7 +42,7 @@ interface ApiResponse {
   overdueInvoiceCounts: number;
 }
 
-// Constants for maintainability
+// === Constants ===
 const API_ENDPOINTS = {
   AGGREGATED: "http://localhost:3000/invoices/aggregated",
   FILTERED: "http://localhost:3000/invoices/filtered",
@@ -83,6 +65,7 @@ const TOAST_CONFIG = {
   },
 };
 
+// === Custom Hook ===
 export const useDashboardData = (
   filters: FilterState,
   currency: "USD" | "EUR" | "GBP",
@@ -92,11 +75,13 @@ export const useDashboardData = (
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ApiResponse | null>(null);
 
+  // Determine if any filters are active
   const isFilterActive = useMemo(
     () => Object.values(filters).some((value) => value !== ""),
     [filters]
   );
 
+  // Fetch dashboard data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -136,7 +121,7 @@ export const useDashboardData = (
     fetchData();
   }, [filters, currency, refreshTrigger, toast, isFilterActive]);
 
-  // Memoized data transformations
+  // Transform totals by status
   const totalsByStatus = useMemo(() => {
     if (!data) return [];
     const statusMap = new Map<string, number>();
@@ -150,6 +135,7 @@ export const useDashboardData = (
     }));
   }, [data]);
 
+  // Transform monthly totals
   const monthlyTotals = useMemo(() => {
     if (!data) return [];
     const monthlyMap = new Map<
@@ -179,6 +165,7 @@ export const useDashboardData = (
       .sort((a, b) => a.month.localeCompare(b.month));
   }, [data]);
 
+  // Transform overdue trend
   const overdueTrend = useMemo(() => {
     if (!data) return [];
     return (data.overdueTrend || []).map((item) => ({
@@ -188,6 +175,7 @@ export const useDashboardData = (
     }));
   }, [data]);
 
+  // Transform customer totals
   const totalsByCustomer = useMemo(() => {
     if (!data) return [];
     return (data.totalsByCustomer || []).map((item) => ({
@@ -197,11 +185,13 @@ export const useDashboardData = (
     }));
   }, [data]);
 
+  // Transform customers
   const customers = useMemo(() => {
     if (!data) return [];
     return data.customers || [];
   }, [data]);
 
+  // Transform overdue count
   const overdueCount = useMemo(() => {
     if (!data) return 0;
     return data.overdueInvoiceCounts || 0;

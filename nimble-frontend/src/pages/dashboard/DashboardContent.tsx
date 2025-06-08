@@ -1,113 +1,55 @@
+// React hooks
 import { useState, useCallback, useMemo } from "react";
+
+// Chakra UI components
 import {
   Box,
-  SimpleGrid,
-  Text,
-  useColorModeValue,
-  ButtonGroup,
   Button,
+  ButtonGroup,
   Flex,
   Grid,
   Select,
+  SimpleGrid,
+  Text,
+  useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
-import FilterBar from "../../components/filters/Filterbar";
-import InvoiceStatusPieChart from "../../components/charts/InvoiceStatusPieChart";
+
+// Third-party libraries
+import Lottie from "react-lottie";
+
+// Custom components - Charts
+import CustomerTotalsHorizontalChart from "../../components/charts/CustomerTotalsHorizontalChart";
 import InvoiceStatusBarChart from "../../components/charts/InvoiceStatusBarChart";
-import OverdueTrendLineChart from "../../components/charts/OverdueTrendLineChart";
-import OverdueTrendAreaChart from "../../components/charts/OverdueTrendAreaChart";
+import InvoiceStatusPieChart from "../../components/charts/InvoiceStatusPieChart";
 import MonthlySummaryBarChart from "../../components/charts/MonthlySummaryBarChart";
 import MonthlySummaryLineChart from "../../components/charts/MonthlySummaryLineChart";
-import CustomerTotalsHorizontalChart from "../../components/charts/CustomerTotalsHorizontalChart";
+import OverdueTrendAreaChart from "../../components/charts/OverdueTrendAreaChart";
+import OverdueTrendLineChart from "../../components/charts/OverdueTrendLineChart";
+
+// Custom components - Other
+import FilterBar from "../../components/filters/Filterbar";
+
+// Custom hooks
 import { useDashboardData } from "../../hooks/useDashboardData";
-import { useToast } from "@chakra-ui/react";
-import Lottie from "react-lottie";
+
+// Types
+import { FilterState } from "../../types";
+
+// Assets
 import uploadLottie from "../../assets/animations/uplaodAnimation.json";
-import { memo } from "react";
 
-interface FilterState {
-  from: string;
-  to: string;
-  status: string;
-  customer: string;
-}
-
-interface StatusData {
-  status: string;
-  total: number;
-}
-
-interface MonthlyData {
-  month: string;
-  total: number;
-  count: number;
-}
-
-interface OverdueData {
-  date: string;
-  count: number;
-  total: number;
-}
-
-interface CustomerData {
-  name: string;
-  total: number;
-  count: number;
-}
-
-// Constants for maintainability
+// === Constants ===
 const CHART_HEIGHT = "400px";
 const UPLOAD_API_URL = "http://localhost:3000/invoices/upload";
 const MIN_ANIMATION_DURATION = 4000;
 
-// Memoized chart components to optimize performance
-const MemoizedInvoiceStatusPieChart = memo(
-  ({ data, currency }: { data: StatusData[]; currency: string }) => (
-    <InvoiceStatusPieChart data={data} currency={currency} />
-  )
-);
-MemoizedInvoiceStatusPieChart.displayName = "MemoizedInvoiceStatusPieChart";
-
-const MemoizedInvoiceStatusBarChart = memo(
-  ({ data, currency }: { data: StatusData[]; currency: string }) => (
-    <InvoiceStatusBarChart data={data} currency={currency} />
-  )
-);
-MemoizedInvoiceStatusBarChart.displayName = "MemoizedInvoiceStatusBarChart";
-
-const MemoizedOverdueTrendLineChart = memo(
-  ({ data }: { data: OverdueData[] }) => <OverdueTrendLineChart data={data} />
-);
-MemoizedOverdueTrendLineChart.displayName = "MemoizedOverdueTrendLineChart";
-
-const MemoizedOverdueTrendAreaChart = memo(
-  ({ data }: { data: OverdueData[] }) => <OverdueTrendAreaChart data={data} />
-);
-MemoizedOverdueTrendAreaChart.displayName = "MemoizedOverdueTrendAreaChart";
-
-const MemoizedMonthlySummaryBarChart = memo(
-  ({ data, currency }: { data: MonthlyData[]; currency: string }) => (
-    <MonthlySummaryBarChart data={data} currency={currency} />
-  )
-);
-MemoizedMonthlySummaryBarChart.displayName = "MemoizedMonthlySummaryBarChart";
-
-const MemoizedMonthlySummaryLineChart = memo(
-  ({ data, currency }: { data: MonthlyData[]; currency: string }) => (
-    <MonthlySummaryLineChart data={data} currency={currency} />
-  )
-);
-MemoizedMonthlySummaryLineChart.displayName = "MemoizedMonthlySummaryLineChart";
-
-const MemoizedCustomerTotalsHorizontalChart = memo(
-  ({ data, currency }: { data: CustomerData[]; currency: string }) => (
-    <CustomerTotalsHorizontalChart data={data} currency={currency} />
-  )
-);
-MemoizedCustomerTotalsHorizontalChart.displayName =
-  "MemoizedCustomerTotalsHorizontalChart";
-
+// === Main Component ===
 const DashboardContent = () => {
   const cardBg = useColorModeValue("white", "gray.800");
+  const toast = useToast();
+
+  // === State ===
   const [statusChartType, setStatusChartType] = useState<"pie" | "bar">("pie");
   const [overdueChartType, setOverdueChartType] = useState<"line" | "area">(
     "line"
@@ -122,10 +64,11 @@ const DashboardContent = () => {
     customer: "",
   });
   const [currency, setCurrency] = useState<"USD" | "EUR" | "GBP">("USD");
+
   const [isLoading, setIsLoading] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const toast = useToast();
 
+  // === Data Hook ===
   const {
     totalsByStatus,
     overdueTrend,
@@ -135,7 +78,7 @@ const DashboardContent = () => {
     overdueCount,
   } = useDashboardData(filters, currency, refreshTrigger);
 
-  // Generic filter update function for type safety and modularity
+  // === Handlers ===
   const updateFilter = useCallback(
     <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
       setFilters((prev) => ({ ...prev, [key]: value }));
@@ -224,6 +167,7 @@ const DashboardContent = () => {
     [toast]
   );
 
+  // === Memoized Values ===
   const isFilterActive = useMemo(
     () => Object.values(filters).some((value) => value !== ""),
     [filters]
@@ -249,6 +193,7 @@ const DashboardContent = () => {
     []
   );
 
+  // === Render ===
   return (
     <Grid
       templateColumns={{ base: "1fr", md: "260px 1fr" }}
@@ -256,6 +201,7 @@ const DashboardContent = () => {
       py={{ base: 2, md: 4 }}
       fontFamily={"Varela Round, sans-serif"}
     >
+      {/* Sidebar */}
       <Box w={{ base: "100%", md: "260px" }}>
         <Box mb={4}>
           <Button
@@ -298,7 +244,6 @@ const DashboardContent = () => {
             <option value="GBP">GBP 💷</option>
           </Select>
         </Box>
-
         <FilterBar
           from={filters.from}
           to={filters.to}
@@ -309,7 +254,9 @@ const DashboardContent = () => {
         />
       </Box>
 
+      {/* Main Content */}
       <Box position="relative">
+        {/* Filter Status */}
         {isFilterActive && (
           <Box
             mb={4}
@@ -336,6 +283,7 @@ const DashboardContent = () => {
           </Box>
         )}
 
+        {/* Loading Overlay */}
         {isLoading && (
           <Flex
             position="absolute"
@@ -354,6 +302,7 @@ const DashboardContent = () => {
           </Flex>
         )}
 
+        {/* Summary Cards */}
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} mb={4}>
           <Box bg={cardBg} borderRadius="xl" p={4} boxShadow="sm">
             <Text fontSize="sm" fontWeight="medium" color="gray.500">
@@ -366,7 +315,6 @@ const DashboardContent = () => {
               {isFilterActive ? "Filtered" : "Total"}
             </Text>
           </Box>
-
           <Box bg={cardBg} borderRadius="xl" p={4} boxShadow="sm">
             <Text fontSize="sm" fontWeight="medium" color="gray.500">
               Total Invoices
@@ -380,6 +328,7 @@ const DashboardContent = () => {
           </Box>
         </SimpleGrid>
 
+        {/* Invoice Status Chart */}
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} mb={4}>
           <Box
             bg={cardBg}
@@ -417,18 +366,19 @@ const DashboardContent = () => {
               </ButtonGroup>
             </Flex>
             {statusChartType === "pie" ? (
-              <MemoizedInvoiceStatusPieChart
+              <InvoiceStatusPieChart
                 data={totalsByStatus}
                 currency={currency}
               />
             ) : (
-              <MemoizedInvoiceStatusBarChart
+              <InvoiceStatusBarChart
                 data={totalsByStatus}
                 currency={currency}
               />
             )}
           </Box>
 
+          {/* Overdue Trend Chart */}
           <Box
             bg={cardBg}
             borderRadius="xl"
@@ -465,13 +415,14 @@ const DashboardContent = () => {
               </ButtonGroup>
             </Flex>
             {overdueChartType === "line" ? (
-              <MemoizedOverdueTrendLineChart data={overdueTrend} />
+              <OverdueTrendLineChart data={overdueTrend} />
             ) : (
-              <MemoizedOverdueTrendAreaChart data={overdueTrend} />
+              <OverdueTrendAreaChart data={overdueTrend} />
             )}
           </Box>
         </SimpleGrid>
 
+        {/* Monthly and Customer Charts */}
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
           <Box
             bg={cardBg}
@@ -509,18 +460,17 @@ const DashboardContent = () => {
               </ButtonGroup>
             </Flex>
             {monthlyChartType === "bar" ? (
-              <MemoizedMonthlySummaryBarChart
+              <MonthlySummaryBarChart
                 data={monthlyTotals}
                 currency={currency}
               />
             ) : (
-              <MemoizedMonthlySummaryLineChart
+              <MonthlySummaryLineChart
                 data={monthlyTotals}
                 currency={currency}
               />
             )}
           </Box>
-
           <Box
             bg={cardBg}
             borderRadius="xl"
@@ -534,7 +484,7 @@ const DashboardContent = () => {
               Totals by Customer ({currency})
             </Text>
             {totalsByCustomer.length > 0 ? (
-              <MemoizedCustomerTotalsHorizontalChart
+              <CustomerTotalsHorizontalChart
                 data={totalsByCustomer}
                 currency={currency}
               />
@@ -550,4 +500,5 @@ const DashboardContent = () => {
     </Grid>
   );
 };
+
 export default DashboardContent;

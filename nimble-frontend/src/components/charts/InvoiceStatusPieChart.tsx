@@ -1,17 +1,21 @@
+// React hooks
+import React from "react";
+
+// Recharts components
 import {
-  PieChart,
-  Pie,
   Cell,
-  Tooltip,
-  ResponsiveContainer,
   Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
 } from "recharts";
+
+// Chakra UI components
 import { Box, Text } from "@chakra-ui/react";
 
-interface PieData {
-  status: string;
-  total: number;
-}
+// Types
+import { StatusData } from "../../types";
 
 const COLORS = ["#6B46C1", "#ED8936", "#E53E3E"];
 
@@ -42,7 +46,7 @@ const InvoiceStatusPieChart = ({
   data,
   currency,
 }: {
-  data: PieData[];
+  data: StatusData[];
   currency: string;
 }) => {
   if (!data || data.length === 0)
@@ -68,15 +72,14 @@ const InvoiceStatusPieChart = ({
     >
       <Box mt={9} w="100%" h="350px">
         <ResponsiveContainer width="100%" height="100%">
-          {/* Fixed width and height for centering */}
           <PieChart>
             <Pie
               dataKey="total"
               nameKey="status"
               data={data}
-              cx="50%" // Centered horizontally within the fixed width
-              cy="50%" // Centered vertically within the fixed height
-              outerRadius={100} // Adjusted radius for better fit
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
               fill="#8884d8"
               label={({ value }) =>
                 value.toLocaleString(undefined, {
@@ -113,4 +116,9 @@ const InvoiceStatusPieChart = ({
   );
 };
 
-export default InvoiceStatusPieChart;
+export default React.memo(InvoiceStatusPieChart, (prevProps, nextProps) => {
+  return (
+    JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) &&
+    prevProps.currency === nextProps.currency
+  );
+});

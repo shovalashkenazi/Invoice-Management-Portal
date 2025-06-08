@@ -1,13 +1,22 @@
+// React hooks
+import React from "react";
+
+// Recharts components
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
 } from "recharts";
+
+// Chakra UI components
 import { Box, Text } from "@chakra-ui/react";
+
+// Types
+import { StatusData } from "../../types";
 
 const CustomTooltip = ({
   active,
@@ -36,7 +45,7 @@ const InvoiceStatusBarChart = ({
   data,
   currency,
 }: {
-  data: { status: string; total: number }[];
+  data: StatusData[];
   currency: string;
 }) => {
   if (!data?.length)
@@ -76,4 +85,9 @@ const InvoiceStatusBarChart = ({
   );
 };
 
-export default InvoiceStatusBarChart;
+export default React.memo(InvoiceStatusBarChart, (prevProps, nextProps) => {
+  return (
+    JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) &&
+    prevProps.currency === nextProps.currency
+  );
+});

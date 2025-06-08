@@ -1,19 +1,22 @@
-import { useMemo } from "react";
+// React hooks
+import React, { useMemo } from "react";
+
+// Recharts components
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
+  BarChart,
   CartesianGrid,
   ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
-import { Box, Text, Badge, Flex } from "@chakra-ui/react";
 
-interface CustomerData {
-  name: string;
-  total: number;
-}
+// Chakra UI components
+import { Badge, Box, Flex, Text } from "@chakra-ui/react";
+
+// Types
+import { CustomerData } from "../../types";
 
 const CustomerTotalsHorizontalChart = ({
   data,
@@ -105,8 +108,6 @@ const CustomerTotalsHorizontalChart = ({
 
   return (
     <Box w="100%" h="350px">
-      {" "}
-      {/* Increased height to accommodate currency badge */}
       <Flex justify="space-between" align="center" mb={2}>
         {data.length > 10 && (
           <Badge colorScheme="purple" variant="subtle" fontSize="xs">
@@ -152,4 +153,12 @@ const CustomerTotalsHorizontalChart = ({
   );
 };
 
-export default CustomerTotalsHorizontalChart;
+export default React.memo(
+  CustomerTotalsHorizontalChart,
+  (prevProps, nextProps) => {
+    return (
+      JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data) &&
+      prevProps.currency === nextProps.currency
+    );
+  }
+);

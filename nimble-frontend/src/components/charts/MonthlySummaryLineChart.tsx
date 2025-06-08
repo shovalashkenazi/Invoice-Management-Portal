@@ -9,12 +9,13 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Box, Text } from "@chakra-ui/react";
+import { MonthlyData } from "../../types";
 
 const MonthlySummaryLineChart = ({
   data,
   currency,
 }: {
-  data: { month: string; total: number }[];
+  data: MonthlyData[];
   currency: string;
 }) => {
   // Smart data filtering for better UX

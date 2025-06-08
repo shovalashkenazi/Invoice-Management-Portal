@@ -1,21 +1,24 @@
-import { useMemo } from "react";
+// React hooks
+import React, { useMemo } from "react";
+
+// Recharts components
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
 } from "recharts";
-import { Box, Text, Badge } from "@chakra-ui/react";
 
-interface TrendData {
-  date: string;
-  count: number;
-}
+// Chakra UI components
+import { Badge, Box, Text } from "@chakra-ui/react";
 
-const OverdueTrendLineChart = ({ data }: { data: TrendData[] }) => {
+// Types
+import { OverdueData } from "../../types";
+
+const OverdueTrendLineChart = ({ data }: { data: OverdueData[] }) => {
   // Smart data processing for better readability
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -172,4 +175,6 @@ const OverdueTrendLineChart = ({ data }: { data: TrendData[] }) => {
   );
 };
 
-export default OverdueTrendLineChart;
+export default React.memo(OverdueTrendLineChart, (prevProps, nextProps) => {
+  return JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data);
+});

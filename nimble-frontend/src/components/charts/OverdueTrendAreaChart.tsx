@@ -1,20 +1,24 @@
-import { useMemo } from "react";
+// React hooks
+import React, { useMemo } from "react";
+
+// Recharts components
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
 } from "recharts";
-import { Box, Text, Badge } from "@chakra-ui/react";
 
-const OverdueTrendAreaChart = ({
-  data,
-}: {
-  data: { date: string; count: number }[];
-}) => {
+// Chakra UI components
+import { Badge, Box, Text } from "@chakra-ui/react";
+
+// Types
+import { OverdueData } from "../../types";
+
+const OverdueTrendAreaChart = ({ data }: { data: OverdueData[] }) => {
   // Smart data processing for better readability
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return [];
@@ -146,7 +150,6 @@ const OverdueTrendAreaChart = ({
             label={{
               value: "Overdue Count",
               angle: -90,
-              // mt : -10,
               position: "insideLeft",
               style: { textAnchor: "middle", fontSize: 12, fill: "#4A5568" },
             }}
@@ -171,4 +174,6 @@ const OverdueTrendAreaChart = ({
   );
 };
 
-export default OverdueTrendAreaChart;
+export default React.memo(OverdueTrendAreaChart, (prevProps, nextProps) => {
+  return JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data);
+});
