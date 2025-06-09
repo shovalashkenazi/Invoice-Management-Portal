@@ -100,7 +100,6 @@ npm run dev
 ### Database Design
 
 - **Normalized Schema**: Separate tables for Invoices and Suppliers to avoid data duplication
-- **Efficient Indexing**: Indexes on frequently queried fields (status, due_date, customer_id)
 - **Scalable Structure**: Designed to handle large datasets efficiently
 
 ### API Design
@@ -115,27 +114,6 @@ npm run dev
 - **Custom Hooks**: Separation of business logic from UI components
 - **Responsive Design**: Mobile-friendly interface with Chakra UI
 - **State Management**: Local state with React hooks for optimal performance
-
-## 🔧 Key Implementation Details
-
-### CSV Processing
-
-- Client-side validation before upload
-- Server-side parsing and data normalization
-- Duplicate detection and error handling
-
-### Data Visualization
-
-- Interactive charts with custom tooltips
-- Dynamic chart type switching
-- Responsive design for all screen sizes
-- Smart data limiting for better performance
-
-### Filtering System
-
-- Real-time filter application
-- Multiple filter criteria support
-- Filter state management with clear indicators
 
 ## 📈 Business Logic
 
@@ -152,15 +130,3 @@ An invoice is considered overdue if:
 - **Monthly Summaries**: Monthly totals with invoice counts
 - **Customer Analysis**: Total amounts per customer with ranking
 - **Overdue Trends**: Monthly overdue invoice counts over time
-
-## 🚀 Future Enhancements
-
-- Advanced filtering options (custom date ranges)
-- Export functionality (PDF, Excel)
-- Real-time updates with WebSocket
-- User authentication and role management
-- Additional chart types and analytics
-
----
-
-_This project demonstrates fullstack development capabilities including database design, API development, data visualization, and modern frontend practices._
