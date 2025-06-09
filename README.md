@@ -1,4 +1,4 @@
-# 📊 Nimble - Invoice Dashboard (Fullstack Assignment)
+# 📊 Nimble - Invoice managment Portal
 
 A fullstack application for managing and analyzing invoice data with interactive visualizations, CSV upload functionality, and real-time filtering capabilities.
 
@@ -37,7 +37,7 @@ A fullstack application for managing and analyzing invoice data with interactive
 
 ```bash
 # Navigate to backend directory
-cd backend
+cd nimble-backend
 
 # Install dependencies
 npm install
@@ -57,7 +57,7 @@ npm run start:dev
 
 ```bash
 # Navigate to frontend directory
-cd frontend
+cd nimble-frontend
 
 # Install dependencies
 npm install
