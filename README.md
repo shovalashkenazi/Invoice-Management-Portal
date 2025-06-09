@@ -98,4 +98,12 @@ npm start
 
 ### 🖼️ UI Images and Videos
 
-![Responsive Design](image.png)
+![UI Screenshot](image.png)
+
+#### 🎥 UI Demo Videos
+
+**Responsive Design Preview**  
+[▶️ Watch Video on Google Drive](https://drive.google.com/file/d/1_4IJDX-EpTzuNJ0UnaQfR7bpf_4TnMVc/view?usp=drive_link)
+
+**UI Walkthrough**  
+[▶️ Watch Video on Google Drive](https://drive.google.com/file/d/1upcufkq6HkU-h1ik4u5eZpgmIRYtyxEW/view?usp=drive_link)
