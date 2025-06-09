@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Box, Button, ButtonGroup, Flex, Grid, Select, SimpleGrid, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Button, ButtonGroup, Flex, Grid, Icon, Select, SimpleGrid, Text, useColorModeValue } from '@chakra-ui/react';
 import Lottie from 'react-lottie';
 
 // Chart Components
@@ -10,6 +10,7 @@ import MonthlySummaryBarChart from '../../components/charts/MonthlySummaryBarCha
 import MonthlySummaryLineChart from '../../components/charts/MonthlySummaryLineChart';
 import OverdueTrendAreaChart from '../../components/charts/OverdueTrendAreaChart';
 import OverdueTrendLineChart from '../../components/charts/OverdueTrendLineChart';
+import { IoCloudUploadOutline } from 'react-icons/io5';
 
 // Other Components
 import FilterBar from '../../components/filters/Filterbar';
@@ -115,7 +116,11 @@ const DashboardContent = () => {
             borderRadius="xl"
             bg={cardBackgroundColor}
             size="sm"
-            rightIcon={<Text fontSize="sm">📤</Text>}
+            rightIcon={
+              <Flex fontSize="sm">
+                <Icon name="upload" boxSize={4} as={IoCloudUploadOutline as any} />
+              </Flex>
+            }
             _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}
             aria-label="Upload CSV file"
           >
@@ -127,11 +132,12 @@ const DashboardContent = () => {
         {/* Currency Selector */}
         <Box mb={4}>
           <Select
-            borderRadius="xl"
             bg={cardBackgroundColor}
             value={selectedCurrency}
             textAlign="center"
             justifyContent="center"
+            cursor="pointer"
+            borderRadius="xl"
             onChange={(e) => setSelectedCurrency(e.target.value as SupportedCurrency)}
             size="sm"
             aria-label="Select currency"

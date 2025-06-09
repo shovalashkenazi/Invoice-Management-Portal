@@ -95,3 +95,17 @@ npm start
 - **Modular Structure**: Domain-organized modules (invoices, currency) for better maintainability
 - **Service-Oriented**: Clear separation between controllers, services, and data processing utilities
 - **RESTful Controllers**: Clean API endpoints for CSV upload, data aggregation, and filtering
+
+### 🖼️ UI Images and Videos
+
+#### Responsive Design Preview
+
+![Responsive Design](image.png)
+
+#### Interactive Demos
+
+**Responsive Dashboard Behavior**  
+<video controls width="600" src="20250609-1451-42.0399211.mp4" title="Responsive Design Preview"></video>
+
+**UI Walkthrough**  
+<video controls width="600" src="20250609-1455-20.0813525.mp4" title="UI Walkthrough"></video>
