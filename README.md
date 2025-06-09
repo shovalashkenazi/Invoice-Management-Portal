@@ -90,6 +90,6 @@ npm start
 
 ### Backend Architecture
 
-**Modular Structure**: Domain-organized modules (invoices, currency) for better maintainability
-**:Service-Oriented**: Clear separation between controllers, services, and data processing utilities
-**:RESTful Controllers**: Clean API endpoints for CSV upload, data aggregation, and filtering
+- **Modular Structure**: Domain-organized modules (invoices, currency) for better maintainability
+- **:Service-Oriented**: Clear separation between controllers, services, and data processing utilities
+- **:RESTful Controllers**: Clean API endpoints for CSV upload, data aggregation, and filtering
