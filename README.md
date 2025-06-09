@@ -1,317 +1,166 @@
 # 📊 Nimble - Invoice Dashboard (Fullstack Assignment)
 
-A comprehensive fullstack solution for managing and analyzing invoice data with interactive visualizations, CSV import capabilities, and real-time filtering. Built with modern technologies for optimal performance and user experience.
+A fullstack application for managing and analyzing invoice data with interactive visualizations, CSV upload functionality, and real-time filtering capabilities.
 
 ## 🧩 Tech Stack
 
 ### Frontend
 
-- **React 18** with TypeScript for type-safe development
-- **Chakra UI** for consistent, accessible component design
-- **Recharts** for interactive data visualizations
-- **React Router** for client-side navigation
-- **Custom Hooks** for state management and data fetching
+- **React** with TypeScript
+- **Chakra UI** for component library and styling
+- **Recharts** for data visualizations
+- **React Router** for navigation
 
 ### Backend
 
 - **NestJS** with TypeScript
 - **Prisma ORM** for database operations
-- **PostgreSQL** for data persistence
+- **PostgreSQL** for data storage
 
-### Testing
+## 🚀 Features
 
-- TO DO: Jest, React Testing Library
+### Backend Service
 
-## 🚀 Features Overview
+- **CSV Upload API**: Upload and process invoice CSV files with automatic data validation
+- **Aggregated Data API**: Retrieve statistics including totals by status, overdue counts, and monthly summaries
+- **Filtering API**: Filter data by date range, invoice status, and customer
+- **Normalized Database Schema**: Efficient storage with separate Invoice and Supplier tables
 
-### ✅ CSV Upload & Data Management
+### Frontend Dashboard
 
-- **Drag & Drop CSV Upload** with real-time validation
-- **Lottie Animation** feedback during upload process
-- **Client-side Validation** for data integrity before API calls
-- **Automatic Data Normalization** into `Invoice` and `Supplier` tables
-- **Duplicate Detection** and error handling
-- **Toast Notifications** for upload status feedback
+- **Invoice Status Visualization**: Pie and bar charts showing total amounts by status (Confirmed, Pending, Cancelled)
+- **Overdue Trends**: Line and area charts displaying overdue invoice trends over time
+- **Monthly Analysis**: Bar and line charts for monthly invoice totals
+- **Customer Analysis**: Horizontal bar chart showing total amounts by customer
+- **Interactive Filtering**: Filter by date range, status, and customer with real-time updates
+- **Chart Type Toggles**: Switch between different visualization types
+- **Currency Support**: View data in USD, EUR, or GBP
 
-### 📈 Interactive Dashboard Visualizations
+### Business Logic
 
-- **Invoice Status Analysis**: Toggle between Pie and Bar charts
-- **Overdue Trends**: Line and Area chart options with statistical badges
-- **Monthly Summaries**: Bar and Line chart views with smart data limiting
-- **Customer Analysis**: Horizontal bar chart with top 10 customers display
-- **Real-time Currency Conversion** (USD, EUR, GBP)
-- **Responsive Charts** with custom tooltips and formatters
-
-### 🔍 Advanced Filtering System
-
-- **Date Range Filtering**: Year and month selection with validation
-- **Status Filtering**: Filter by `CONFIRMED`, `PENDING`, `CANCELLED`
-- **Customer Filtering**: Dropdown with all available customers
-- **Filter State Management**: Active filter indicators and quick reset
-- **Collapsible Mobile Interface** for better UX on smaller screens
-
-### 🎨 User Experience Features
-
-- **Dark/Light Mode Support** with Chakra UI color mode
-- **Responsive Design** for mobile, tablet, and desktop
-- **Loading States** with elegant animations
-- **Error Boundaries** for graceful error handling
-- **Accessibility Features** with proper ARIA labels
-- **Smart Data Visualization** with automatic data limiting for performance
-
-## 🏗️ Frontend Architecture
-
-### Component Structure
-
-```
-src/
-├── components/
-│   ├── charts/                    # Visualization components
-│   │   ├── CustomerTotalsHorizontalChart.tsx
-│   │   ├── InvoiceStatusBarChart.tsx
-│   │   ├── InvoiceStatusPieChart.tsx
-│   │   ├── MonthlySummaryBarChart.tsx
-│   │   ├── MonthlySummaryLineChart.tsx
-│   │   ├── OverdueTrendAreaChart.tsx
-│   │   └── OverdueTrendLineChart.tsx
-│   ├── filters/
-│   │   └── FilterBar.tsx          # Advanced filtering interface
-│   └── layout/
-│       ├── DashboardLayout.tsx    # Main layout wrapper
-│       ├── Navbar.tsx
-│       └── Footer.tsx
-├── hooks/
-│   ├── useDashboardData.ts        # Data fetching and transformation
-│   └── useFileUpload.ts           # CSV upload functionality
-├── pages/
-│   └── dashboard/
-│       ├── index.tsx              # Dashboard page component
-│       └── DashboardContent.tsx   # Main dashboard logic
-├── routes/
-│   └── AppRoutes.tsx              # Application routing
-├── types/                         # TypeScript type definitions
-└── constants/                     # Application constants
-```
-
-### Key Design Patterns
-
-#### 1. **Custom Hooks Pattern**
-
-- `useDashboardData`: Handles API calls, data transformation, and caching
-- `useCsvUpload`: Manages file upload, validation, and progress tracking
-- Separation of concerns between UI and business logic
-
-#### 2. **Component Composition**
-
-- Modular chart components with consistent interfaces
-- Reusable layout components for consistent styling
-- Props-based configuration for flexibility
-
-#### 3. **State Management**
-
-- Local state with React hooks for UI interactions
-- Centralized filter state management
-- Optimistic updates with loading states
-
-#### 4. **Data Transformation Pipeline**
-
-```typescript
-API Response → useDashboardData → Memoized Processing → Chart Components
-```
-
-### Data Flow Architecture
-
-```mermaid
-graph TD
-    A[CSV Upload] --> B[Client Validation]
-    B --> C[API Call]
-    C --> D[Database Storage]
-    D --> E[Dashboard Refresh]
-
-    F[Filter Changes] --> G[useDashboardData Hook]
-    G --> H[API Request with Filters]
-    H --> I[Data Transformation]
-    I --> J[Chart Components Update]
-
-    K[Currency Selection] --> L[Format Numbers]
-    L --> M[Update All Charts]
-```
-
-## 🔧 Client-Side Features Deep Dive
-
-### Chart Interactivity
-
-- **Dynamic Chart Types**: Users can toggle between different visualization types
-- **Smart Data Limiting**: Automatically limits data points for better performance
-- **Custom Tooltips**: Formatted currency values and contextual information
-- **Responsive Scaling**: Charts adapt to container sizes and screen resolutions
-
-### Form Validation & UX
-
-- **Real-time CSV Validation**: Checks data integrity before upload
-- **Date Range Validation**: Ensures logical date selections
-- **Progressive Enhancement**: Graceful degradation for older browsers
-- **Keyboard Navigation**: Full accessibility support
-
-### Performance Optimizations
-
-- **React.memo**: Prevents unnecessary chart re-renders
-- **useMemo/useCallback**: Optimizes expensive calculations
-- **Data Chunking**: Limits displayed data for large datasets
-- **Lazy Loading**: Components load on demand
-
-## ⚙️ Business Logic Implementation
-
-### Overdue Invoice Detection
-
-```typescript
-// Client-side logic mirrors backend rules
-const isOverdue = (invoice) => {
-  return invoice.dueDate < new Date() && invoice.status === "PENDING";
-};
-```
-
-### Data Aggregation Strategy
-
-- **Status Aggregation**: Groups invoices by status with totals
-- **Monthly Summaries**: Time-based aggregation with count and sum
-- **Customer Analysis**: Customer-wise totals with ranking
-- **Trend Analysis**: Time-series data for overdue tracking
-
-### Currency Handling
-
-- **Multi-currency Support**: USD, EUR, GBP with proper formatting
-- **Real-time Conversion**: Updates all charts when currency changes
-- **Locale-aware Formatting**: Uses browser locale for number formatting
-
-## 🧠 Design Decisions & Assumptions
-
-### Frontend Assumptions
-
-- **Modern Browser Support**: ES2020+ features assumed
-- **JavaScript Enabled**: Progressive enhancement for core functionality
-- **Responsive Design**: Mobile-first approach
-- **Accessibility**: WCAG 2.1 AA compliance targeted
-
-### Data Assumptions
-
-- **CSV Format**: Predefined column structure expected
-- **Date Format**: DD/MM/YYYY format for dates
-- **Currency Codes**: ISO 4217 standard (USD, EUR, GBP)
-- **Status Values**: Limited to `CONFIRMED`, `CANCELLED`, `PENDING`
-
-### Performance Considerations
-
-- **Chart Data Limits**: Max 24 months for line charts, top 10 for customer charts
-- **Debounced Filtering**: Prevents excessive API calls
-- **Memoized Calculations**: Expensive operations cached
+- **Overdue Detection**: Automatically flags invoices as overdue based on due date and pending status
+- **Data Aggregation**: Efficient aggregation by status, month, and customer
+- **Optimized Querying**: Database queries optimized for large datasets
 
 ## 🛠️ Setup Instructions
 
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- npm or yarn
-- Modern web browser with ES2020+ support
+- PostgreSQL (v15 or higher)
+- npm
 
-### Frontend Setup
+### Backend Setup
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd nimble-invoice-dashboard
+# Navigate to backend directory
+cd backend
 
 # Install dependencies
 npm install
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env with your database configuration
 
-# Start development server
+# Run database migrations
+npx prisma migrate dev
+
+# Start the backend server
+npm run start:dev
+```
+
+### Frontend Setup
+
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your API endpoint
+
+# Start the development server
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-### Environment Configuration
+## 📊 Using the Application
 
-```env
-# .env
-PORT=4000
-REACT_APP_API_BASE_URL=http://localhost:3000
-```
+1. **Upload CSV Data**: Use the upload button in the sidebar to import invoice data
+2. **View Dashboard**: Explore various charts showing invoice analytics
+3. **Apply Filters**: Use the filter panel to narrow down data by date, status, or customer
+4. **Switch Visualizations**: Toggle between different chart types using the control buttons
+5. **Change Currency**: Select different currencies to view monetary values
 
-## 📱 Responsive Design
+## 🏗️ Architecture & Design Choices
 
-### Breakpoints
+### Database Design
 
-- **Mobile**: < 768px (Single column layout)
-- **Tablet**: 768px - 1024px (Adjusted grid)
-- **Desktop**: > 1024px (Full grid layout)
+- **Normalized Schema**: Separate tables for Invoices and Suppliers to avoid data duplication
+- **Efficient Indexing**: Indexes on frequently queried fields (status, due_date, customer_id)
+- **Scalable Structure**: Designed to handle large datasets efficiently
 
-### Mobile Optimizations
+### API Design
 
-- Collapsible filter sidebar
-- Touch-friendly chart interactions
-- Optimized data loading
-- Simplified navigation
+- **RESTful Endpoints**: Clean, predictable API structure
+- **Data Aggregation**: Server-side aggregation for better performance
+- **Flexible Filtering**: Query parameters for dynamic filtering
 
-## 🚦 Usage Guide
+### Frontend Architecture
 
-### Uploading Data
+- **Component-Based**: Modular, reusable React components
+- **Custom Hooks**: Separation of business logic from UI components
+- **Responsive Design**: Mobile-friendly interface with Chakra UI
+- **State Management**: Local state with React hooks for optimal performance
 
-1. Click the "Upload CSV" button in the sidebar
-2. Select a properly formatted CSV file
-3. Wait for validation and upload confirmation
-4. Dashboard automatically refreshes with new data
+## 🔧 Key Implementation Details
 
-### Filtering Data
+### CSV Processing
 
-1. Use the filter sidebar to select criteria
-2. Filters apply automatically to all charts
-3. Active filter indicator shows when filters are applied
-4. Click "Clear Filters" to reset all filters
+- Client-side validation before upload
+- Server-side parsing and data normalization
+- Duplicate detection and error handling
 
-### Viewing Insights
+### Data Visualization
 
-1. Toggle between chart types using the button groups
-2. Hover over chart elements for detailed tooltips
-3. Use currency selector to view data in different currencies
-4. Responsive charts adapt to your screen size
+- Interactive charts with custom tooltips
+- Dynamic chart type switching
+- Responsive design for all screen sizes
+- Smart data limiting for better performance
 
-## 🔮 Future Enhancements
+### Filtering System
 
-### Planned Features
+- Real-time filter application
+- Multiple filter criteria support
+- Filter state management with clear indicators
 
-- [ ] Export functionality (PDF, Excel)
-- [ ] Advanced analytics (forecasting, trends)
-- [ ] Real-time data updates (WebSocket)
-- [ ] User authentication and multi-tenancy
-- [ ] Advanced filtering (custom date ranges, multiple selections)
-- [ ] Dashboard customization (drag & drop widgets)
+## 📈 Business Logic
 
-### Technical Improvements
+### Overdue Invoice Calculation
 
-- [ ] Unit and integration tests
-- [ ] Performance monitoring
-- [ ] Offline support (PWA)
-- [ ] Advanced error boundary implementation
-- [ ] Internationalization (i18n)
+An invoice is considered overdue if:
 
-## 🤝 Contributing
+- Due date has passed (< current date)
+- Status is "PENDING"
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Data Aggregations
 
-## 📄 License
+- **Status Totals**: Sum of invoice amounts grouped by status
+- **Monthly Summaries**: Monthly totals with invoice counts
+- **Customer Analysis**: Total amounts per customer with ranking
+- **Overdue Trends**: Monthly overdue invoice counts over time
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 🚀 Future Enhancements
+
+- Advanced filtering options (custom date ranges)
+- Export functionality (PDF, Excel)
+- Real-time updates with WebSocket
+- User authentication and role management
+- Additional chart types and analytics
 
 ---
 
-**Built with ❤️ for efficient invoice management and data visualization**
+_This project demonstrates fullstack development capabilities including database design, API development, data visualization, and modern frontend practices._
