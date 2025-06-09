@@ -44,6 +44,7 @@ npm install
 
 # Set up environment variables
 cp .env.example .env
+
 # Edit .env with your database configuration
 DATABASE_URL="postgresql://postgres:9200@localhost:5432/nimble"
 
