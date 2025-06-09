@@ -45,6 +45,7 @@ npm install
 # Set up environment variables
 cp .env.example .env
 # Edit .env with your database configuration
+DATABASE_URL="postgresql://postgres:9200@localhost:5432/nimble"
 
 # Run database migrations
 npx prisma migrate dev
@@ -63,11 +64,13 @@ cd nimble-frontend
 npm install
 
 # Set up environment variables
-cp .env.example .env
-# Edit .env with your API endpoint
+cp .env.example .env with
+
+# Edit .env with your port
+PORT=4000
 
 # Start the development server
-npm run dev
+npm start
 ```
 
 ## 🏗️ Architecture & Design Choices
