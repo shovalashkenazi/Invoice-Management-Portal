@@ -17,6 +17,8 @@ A fullstack application for managing and analyzing invoice data with interactive
 - **Prisma ORM** for database operations
 - **PostgreSQL** for data storage
 
+## 🚀 Features
+
 ### Business Logic
 
 - **Data Aggregation**: Efficient aggregation by status, month, and customer
@@ -67,14 +69,6 @@ cp .env.example .env
 # Start the development server
 npm run dev
 ```
-
-## 📊 Using the Application
-
-1. **Upload CSV Data**: Use the upload button in the sidebar to import invoice data
-2. **View Dashboard**: Explore various charts showing invoice analytics
-3. **Apply Filters**: Use the filter panel to narrow down data by date, status, or customer
-4. **Switch Visualizations**: Toggle between different chart types using the control buttons
-5. **Change Currency**: Select different currencies to view monetary values
 
 ## 🏗️ Architecture & Design Choices
 
