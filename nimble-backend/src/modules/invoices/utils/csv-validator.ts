@@ -15,15 +15,7 @@ export class CSVValidatorService {
   validateRecord(record: CSVRecord, existingSupplier: any): string[] {
     const errors: string[] = [];
 
-    const requiredFields = [
-      'invoice_id',
-      'invoice_date',
-      'invoice_due_date',
-      'invoice_cost',
-      'invoice_currency',
-      'invoice_status',
-      'supplier_internal_id',
-    ];
+    const requiredFields = ['invoice_id', 'invoice_date', 'invoice_due_date', 'invoice_cost', 'invoice_currency', 'invoice_status', 'supplier_internal_id'];
 
     requiredFields.forEach((field) => {
       if (!record[field as keyof CSVRecord]) {
@@ -31,16 +23,8 @@ export class CSVValidatorService {
       }
     });
 
-    const invoiceDate = parseDate(
-      record.invoice_date,
-      'dd/MM/yyyy',
-      new Date(),
-    );
-    const dueDate = parseDate(
-      record.invoice_due_date,
-      'dd/MM/yyyy',
-      new Date(),
-    );
+    const invoiceDate = parseDate(record.invoice_date, 'dd/MM/yyyy', new Date());
+    const dueDate = parseDate(record.invoice_due_date, 'dd/MM/yyyy', new Date());
 
     if (isNaN(invoiceDate.getTime()) || isNaN(dueDate.getTime())) {
       errors.push('invalid_date_format');
@@ -82,17 +66,12 @@ export class CSVValidatorService {
     if (filters.currency && !['USD', 'EUR', 'GBP'].includes(filters.currency)) {
       errors.push('Invalid currency');
     }
-    if (
-      filters.status &&
-      !['CONFIRMED', 'CANCELLED', 'PENDING'].includes(filters.status)
-    ) {
+    if (filters.status && !['CONFIRMED', 'CANCELLED', 'PENDING'].includes(filters.status)) {
       errors.push('Invalid status');
     }
 
     if (errors.length > 0) {
-      throw new BadRequestException(
-        `Filter validation errors: ${errors.join(', ')}`,
-      );
+      throw new BadRequestException(`Filter validation errors: ${errors.join(', ')}`);
     }
   }
 }

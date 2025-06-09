@@ -31,9 +31,7 @@ export class ValidationException extends BadRequestException {
           invalid_currency: 'Invalid currency',
           invalid_status: 'Invalid status',
         };
-        const readableErrors = errors
-          .map((error) => errorMap[error] || error)
-          .join(', ');
+        const readableErrors = errors.map((error) => errorMap[error] || error).join(', ');
         return `Invoice ${invoiceId}: Missing or invalid fields - ${readableErrors}`;
       })
       .join('\n- ');
@@ -70,8 +68,7 @@ export class InvoicesService {
     this.csvValidator.validateUniqueInvoiceIds(records);
 
     // Process records in batches
-    const { updatedRecords, validationErrors } =
-      await this.invoiceProcessor.processRecordsInBatches(records);
+    const { updatedRecords, validationErrors } = await this.invoiceProcessor.processRecordsInBatches(records);
 
     // Handle validation errors
     if (Object.keys(validationErrors).length > 0) {
@@ -92,28 +89,25 @@ export class InvoicesService {
     const targetCurrency = filters.currency || 'USD';
     const currentDate = new Date();
 
-    const [
-      totalsByStatus,
-      overdueInvoiceCounts,
-      monthlySummaries,
-      totalsByCustomerRaw,
-    ] = await Promise.all([
+    const [totalsByStatus, overdueInvoiceCounts, monthlySummaries, totalsByCustomerRaw] = await Promise.all([
       this.prisma.invoice.groupBy({
         by: ['status', 'currency'],
         _sum: { cost: true },
       }),
+
       this.prisma.invoice.count({
         where: {
           dueDate: { lt: currentDate },
           status: { in: ['PENDING'] },
         },
       }),
+
       this.prisma.invoice.groupBy({
         by: ['invoiceDate', 'currency'],
-        where: { status: 'CONFIRMED' },
         _sum: { cost: true },
         _count: { id: true },
       }),
+
       this.prisma.invoice.groupBy({
         by: ['supplierId', 'currency'],
         _sum: { cost: true },
@@ -121,21 +115,14 @@ export class InvoicesService {
       }),
     ]);
 
-    const {
-      transformedTotalsByStatus,
-      monthlySummariesByCurrency,
-      totalsByCustomer,
-    } = await this.dataTransformer.transformInvoiceData(
+    const { transformedTotalsByStatus, monthlySummariesByCurrency, totalsByCustomer } = await this.dataTransformer.transformInvoiceData(
       totalsByStatus,
       monthlySummaries,
       totalsByCustomerRaw,
       targetCurrency,
     );
 
-    const overdueTrend = await this.dataTransformer.getOverdueTrend(
-      {},
-      targetCurrency,
-    );
+    const overdueTrend = await this.dataTransformer.getOverdueTrend({}, targetCurrency);
     const customers = await this.dataTransformer.getCustomersList();
 
     return {
@@ -153,17 +140,13 @@ export class InvoicesService {
     const targetCurrency = filters.currency || 'USD';
     const whereClause = this.buildWhereClause(filters);
 
-    const [
-      totalsByStatus,
-      overdueInvoiceCounts,
-      monthlySummaries,
-      totalsByCustomerRaw,
-    ] = await Promise.all([
+    const [totalsByStatus, overdueInvoiceCounts, monthlySummaries, totalsByCustomerRaw] = await Promise.all([
       this.prisma.invoice.groupBy({
         by: ['status', 'currency'],
         where: whereClause,
         _sum: { cost: true },
       }),
+
       this.prisma.invoice.count({
         where: {
           ...whereClause,
@@ -171,12 +154,14 @@ export class InvoicesService {
           status: { in: ['PENDING'] },
         },
       }),
+
       this.prisma.invoice.groupBy({
         by: ['invoiceDate', 'currency'],
-        where: { ...whereClause, status: 'CONFIRMED' },
+        where: { ...whereClause },
         _sum: { cost: true },
         _count: { id: true },
       }),
+
       this.prisma.invoice.groupBy({
         by: ['supplierId', 'currency'],
         where: whereClause,
@@ -185,21 +170,14 @@ export class InvoicesService {
       }),
     ]);
 
-    const {
-      transformedTotalsByStatus,
-      monthlySummariesByCurrency,
-      totalsByCustomer,
-    } = await this.dataTransformer.transformInvoiceData(
+    const { transformedTotalsByStatus, monthlySummariesByCurrency, totalsByCustomer } = await this.dataTransformer.transformInvoiceData(
       totalsByStatus,
       monthlySummaries,
       totalsByCustomerRaw,
       targetCurrency,
     );
 
-    const overdueTrend = await this.dataTransformer.getOverdueTrend(
-      whereClause,
-      targetCurrency,
-    );
+    const overdueTrend = await this.dataTransformer.getOverdueTrend(whereClause, targetCurrency);
     const customers = await this.dataTransformer.getCustomersList();
 
     return {

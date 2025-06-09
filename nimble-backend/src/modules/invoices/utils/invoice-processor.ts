@@ -31,26 +31,11 @@ export class InvoiceProcessorService {
             }
 
             const supplier = await this.upsertSupplier(tx, record);
-            const invoiceDate = parseDate(
-              record.invoice_date,
-              'dd/MM/yyyy',
-              new Date(),
-            );
-            const dueDate = parseDate(
-              record.invoice_due_date,
-              'dd/MM/yyyy',
-              new Date(),
-            );
+            const invoiceDate = parseDate(record.invoice_date, 'dd/MM/yyyy', new Date());
+            const dueDate = parseDate(record.invoice_due_date, 'dd/MM/yyyy', new Date());
             const cost = parseFloat(record.invoice_cost);
 
-            const message = await this.updateOrCreateInvoice(
-              tx,
-              record,
-              invoiceDate,
-              dueDate,
-              cost,
-              supplier.id,
-            );
+            const message = await this.updateOrCreateInvoice(tx, record, invoiceDate, dueDate, cost, supplier.id);
             updatedRecords.push(message);
           }
         },
@@ -68,15 +53,7 @@ export class InvoiceProcessorService {
     // Delegate to CSVValidatorService in a real implementation
     // For simplicity, kept here to avoid circular dependency
     const errors: string[] = [];
-    const requiredFields = [
-      'invoice_id',
-      'invoice_date',
-      'invoice_due_date',
-      'invoice_cost',
-      'invoice_currency',
-      'invoice_status',
-      'supplier_internal_id',
-    ];
+    const requiredFields = ['invoice_id', 'invoice_date', 'invoice_due_date', 'invoice_cost', 'invoice_currency', 'invoice_status', 'supplier_internal_id'];
 
     requiredFields.forEach((field) => {
       if (!record[field as keyof CSVRecord]) {
@@ -84,16 +61,8 @@ export class InvoiceProcessorService {
       }
     });
 
-    const invoiceDate = parseDate(
-      record.invoice_date,
-      'dd/MM/yyyy',
-      new Date(),
-    );
-    const dueDate = parseDate(
-      record.invoice_due_date,
-      'dd/MM/yyyy',
-      new Date(),
-    );
+    const invoiceDate = parseDate(record.invoice_date, 'dd/MM/yyyy', new Date());
+    const dueDate = parseDate(record.invoice_due_date, 'dd/MM/yyyy', new Date());
 
     if (isNaN(invoiceDate.getTime()) || isNaN(dueDate.getTime())) {
       errors.push('invalid_date_format');
@@ -124,11 +93,9 @@ export class InvoiceProcessorService {
   }
 
   private async upsertSupplier(tx: any, record: CSVRecord) {
-    const parseIntSafe = (value: string | undefined): number | null =>
-      value !== undefined && value !== '' ? parseInt(value, 10) : null;
+    const parseIntSafe = (value: string | undefined): number | null => (value !== undefined && value !== '' ? parseInt(value, 10) : null);
 
-    const parseFloatSafe = (value: string | undefined): number | null =>
-      value !== undefined && value !== '' ? parseFloat(value) : null;
+    const parseFloatSafe = (value: string | undefined): number | null => (value !== undefined && value !== '' ? parseFloat(value) : null);
 
     const supplierData = {
       internalId: record.supplier_internal_id,
@@ -158,14 +125,7 @@ export class InvoiceProcessorService {
     });
   }
 
-  private async updateOrCreateInvoice(
-    tx: any,
-    record: CSVRecord,
-    invoiceDate: Date,
-    dueDate: Date,
-    cost: number,
-    supplierId: string,
-  ) {
+  private async updateOrCreateInvoice(tx: any, record: CSVRecord, invoiceDate: Date, dueDate: Date, cost: number, supplierId: string) {
     const invoiceData = {
       invoiceId: record.invoice_id,
       invoiceDate,
@@ -183,8 +143,6 @@ export class InvoiceProcessorService {
       select: { id: true },
     });
 
-    return result.id
-      ? `Updated invoice ${record.invoice_id}`
-      : `Created invoice ${record.invoice_id}`;
+    return result.id ? `Updated invoice ${record.invoice_id}` : `Created invoice ${record.invoice_id}`;
   }
 }

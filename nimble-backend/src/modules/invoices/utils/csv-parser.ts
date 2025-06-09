@@ -39,25 +39,13 @@ export class CSVParserService {
   }
 
   validateCSVStructure(records: CSVRecord[]): void {
-    const requiredColumns = [
-      'invoice_id',
-      'invoice_date',
-      'invoice_due_date',
-      'invoice_cost',
-      'invoice_currency',
-      'invoice_status',
-      'supplier_internal_id',
-    ];
+    const requiredColumns = ['invoice_id', 'invoice_date', 'invoice_due_date', 'invoice_cost', 'invoice_currency', 'invoice_status', 'supplier_internal_id'];
 
     const headers = Object.keys(records[0] || {});
-    const missingColumns = requiredColumns.filter(
-      (col) => !headers.includes(col),
-    );
+    const missingColumns = requiredColumns.filter((col) => !headers.includes(col));
 
     if (missingColumns.length > 0) {
-      throw new BadRequestException(
-        `Missing required columns: ${missingColumns.join(', ')}`,
-      );
+      throw new BadRequestException(`Missing required columns: ${missingColumns.join(', ')}`);
     }
   }
 }

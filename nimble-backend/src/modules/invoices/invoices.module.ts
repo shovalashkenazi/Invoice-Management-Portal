@@ -10,14 +10,6 @@ import { DataTransformerService } from './utils/data-transformer';
 
 @Module({
   controllers: [InvoicesController],
-  providers: [
-    InvoicesService,
-    PrismaService,
-    CurrencyService,
-    CSVParserService,
-    CSVValidatorService,
-    InvoiceProcessorService,
-    DataTransformerService,
-  ],
+  providers: [InvoicesService, PrismaService, CurrencyService, CSVParserService, CSVValidatorService, InvoiceProcessorService, DataTransformerService],
 })
 export class InvoicesModule {}

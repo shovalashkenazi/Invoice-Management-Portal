@@ -9,14 +9,8 @@ export class DataTransformerService {
     private prisma: PrismaService,
   ) {}
 
-  async transformInvoiceData(
-    totalsByStatus: any[],
-    monthlySummaries: any[],
-    totalsByCustomerRaw: any[],
-    targetCurrency: string,
-  ) {
-    const convertAmount = async (amount: number, from: string) =>
-      this.convertAmount(amount, from, targetCurrency);
+  async transformInvoiceData(totalsByStatus: any[], monthlySummaries: any[], totalsByCustomerRaw: any[], targetCurrency: string) {
+    const convertAmount = async (amount: number, from: string) => this.convertAmount(amount, from, targetCurrency);
 
     const transformedTotalsByStatus = await Promise.all(
       totalsByStatus.map(async (item) => ({
@@ -41,9 +35,7 @@ export class DataTransformerService {
       })),
     );
 
-    const supplierIds = totalsByCustomerByCurrency.map(
-      (item) => item.supplierId,
-    );
+    const supplierIds = totalsByCustomerByCurrency.map((item) => item.supplierId);
     const suppliers = await this.prisma.supplier.findMany({
       where: { id: { in: supplierIds } },
       select: { id: true, companyName: true },
@@ -66,14 +58,8 @@ export class DataTransformerService {
     };
   }
 
-  async convertAmount(
-    amount: number,
-    from: string,
-    to: string,
-  ): Promise<number> {
-    return from === to
-      ? amount
-      : await this.currencyService.convert(amount, from, to);
+  async convertAmount(amount: number, from: string, to: string): Promise<number> {
+    return from === to ? amount : await this.currencyService.convert(amount, from, to);
   }
 
   // === Private Methods - Data Analysis ===
@@ -91,10 +77,7 @@ export class DataTransformerService {
       orderBy: { dueDate: 'asc' },
     });
 
-    const convertAmount = async (amount: number, from: string) =>
-      from === targetCurrency
-        ? amount
-        : await this.currencyService.convert(amount, from, targetCurrency);
+    const convertAmount = async (amount: number, from: string) => (from === targetCurrency ? amount : await this.currencyService.convert(amount, from, targetCurrency));
 
     const monthlyMap = new Map<string, { count: number; total: number }>();
 
@@ -103,9 +86,7 @@ export class DataTransformerService {
       const current = monthlyMap.get(monthKey) || { count: 0, total: 0 };
       monthlyMap.set(monthKey, {
         count: current.count + item._count.id,
-        total:
-          current.total +
-          (await convertAmount(item._sum.cost || 0, item.currency)),
+        total: current.total + (await convertAmount(item._sum.cost || 0, item.currency)),
       });
     }
 
