@@ -53,7 +53,7 @@ export const useDashboardData = (filters: FilterState, currency: 'USD' | 'EUR' |
     };
 
     fetchData();
-  }, [filters, currency, refreshTrigger, toast, isFilterActive]);
+  }, [filters, currency, refreshTrigger, isFilterActive]);
 
   // Transform totals by status
   const totalsByStatus = useMemo(() => {
