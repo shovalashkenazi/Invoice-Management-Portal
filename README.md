@@ -87,3 +87,9 @@ npm start
 - **Custom Hooks**: Separation of business logic from UI components
 - **Responsive Design**: Mobile-friendly interface with Chakra UI
 - **State Management**: Local state with React hooks for optimal performance
+
+### Backend Architecture
+
+**Modular Structure**: Domain-organized modules (invoices, currency) for better maintainability
+**:Service-Oriented**: Clear separation between controllers, services, and data processing utilities
+**:RESTful Controllers**: Clean API endpoints for CSV upload, data aggregation, and filtering
