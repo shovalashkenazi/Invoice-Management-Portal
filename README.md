@@ -108,4 +108,4 @@ npm start
 <video controls width="600" src="20250609-1451-42.0399211.mp4" title="Responsive Design Preview"></video>
 
 **UI Walkthrough**  
-<video controls width="600" src="20250609-1455-20.0813525.mp4" title="UI Walkthrough"></video>
+<video controls src="20250609-1509-45.6447645.mp4" title="UI Walkthrough"></video>
