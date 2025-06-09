@@ -19,28 +19,11 @@ A fullstack application for managing and analyzing invoice data with interactive
 
 ## 🚀 Features
 
-### Backend Service
-
-- **CSV Upload API**: Upload and process invoice CSV files with automatic data validation
-- **Aggregated Data API**: Retrieve statistics including totals by status, overdue counts, and monthly summaries
-- **Filtering API**: Filter data by date range, invoice status, and customer
-- **Normalized Database Schema**: Efficient storage with separate Invoice and Supplier tables
-
-### Frontend Dashboard
-
-- **Invoice Status Visualization**: Pie and bar charts showing total amounts by status (Confirmed, Pending, Cancelled)
-- **Overdue Trends**: Line and area charts displaying overdue invoice trends over time
-- **Monthly Analysis**: Bar and line charts for monthly invoice totals
-- **Customer Analysis**: Horizontal bar chart showing total amounts by customer
-- **Interactive Filtering**: Filter by date range, status, and customer with real-time updates
-- **Chart Type Toggles**: Switch between different visualization types
-- **Currency Support**: View data in USD, EUR, or GBP
-
 ### Business Logic
 
-- **Overdue Detection**: Automatically flags invoices as overdue based on due date and pending status
 - **Data Aggregation**: Efficient aggregation by status, month, and customer
-- **Optimized Querying**: Database queries optimized for large datasets
+- **Upload CSV**: complete..
+- **Filtering**: complete..
 
 ## 🛠️ Setup Instructions
 
@@ -102,31 +85,9 @@ npm run dev
 - **Normalized Schema**: Separate tables for Invoices and Suppliers to avoid data duplication
 - **Scalable Structure**: Designed to handle large datasets efficiently
 
-### API Design
-
-- **RESTful Endpoints**: Clean, predictable API structure
-- **Data Aggregation**: Server-side aggregation for better performance
-- **Flexible Filtering**: Query parameters for dynamic filtering
-
 ### Frontend Architecture
 
 - **Component-Based**: Modular, reusable React components
 - **Custom Hooks**: Separation of business logic from UI components
 - **Responsive Design**: Mobile-friendly interface with Chakra UI
 - **State Management**: Local state with React hooks for optimal performance
-
-## 📈 Business Logic
-
-### Overdue Invoice Calculation
-
-An invoice is considered overdue if:
-
-- Due date has passed (< current date)
-- Status is "PENDING"
-
-### Data Aggregations
-
-- **Status Totals**: Sum of invoice amounts grouped by status
-- **Monthly Summaries**: Monthly totals with invoice counts
-- **Customer Analysis**: Total amounts per customer with ranking
-- **Overdue Trends**: Monthly overdue invoice counts over time
