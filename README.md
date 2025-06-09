@@ -21,6 +21,8 @@ A fullstack application for managing and analyzing invoice data with interactive
 
 ### Business Logic
 
+> \_An invoice is considered **overdue** if its `invoice_due_date` has passed and its `invoice_status` is still PENDING.
+
 - **Data Aggregation**: Aggregates invoice data efficiently by status (e.g., confirmed, cancelled, pending), billing month, and customer.
 - **CSV Upload**: Supports uploading and parsing CSV files, with validation and normalization. Parsed records are stored in a relational database using Prisma, ensuring data consistency and referential integrity.
 - **Filtering**: Enables advanced filtering of invoice records based on date range, invoice status, and customer identity.
