@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { parse as parseDate } from 'date-fns';
 import { CSVRecord } from '../interfaces/csv-record.interface';
 import { FilterParams } from '../interfaces/filter-params.interface';
 
@@ -10,48 +9,6 @@ export class CSVValidatorService {
     if (new Set(invoiceIds).size !== invoiceIds.length) {
       throw new BadRequestException('Duplicate invoice_id found in CSV');
     }
-  }
-
-  validateRecord(record: CSVRecord, existingSupplier: any): string[] {
-    const errors: string[] = [];
-
-    const requiredFields = ['invoice_id', 'invoice_date', 'invoice_due_date', 'invoice_cost', 'invoice_currency', 'invoice_status', 'supplier_internal_id'];
-
-    requiredFields.forEach((field) => {
-      if (!record[field as keyof CSVRecord]) {
-        errors.push(field);
-      }
-    });
-
-    const invoiceDate = parseDate(record.invoice_date, 'dd/MM/yyyy', new Date());
-    const dueDate = parseDate(record.invoice_due_date, 'dd/MM/yyyy', new Date());
-
-    if (isNaN(invoiceDate.getTime()) || isNaN(dueDate.getTime())) {
-      errors.push('invalid_date_format');
-    } else if (dueDate < invoiceDate) {
-      errors.push('due_date_before_invoice_date');
-    }
-
-    const cost = parseFloat(record.invoice_cost);
-    if (isNaN(cost) || cost < 0) {
-      errors.push('invalid_cost');
-    }
-
-    const validCurrencies = ['USD', 'EUR', 'GBP'] as const;
-    if (!validCurrencies.includes(record.invoice_currency as any)) {
-      errors.push('invalid_currency');
-    }
-
-    const validStatuses = ['CONFIRMED', 'CANCELLED', 'PENDING'] as const;
-    if (!validStatuses.includes(record.invoice_status as any)) {
-      errors.push('invalid_status');
-    }
-
-    if (!existingSupplier && !record.supplier_company_name) {
-      errors.push('supplier_company_name');
-    }
-
-    return errors;
   }
 
   validateFilters(filters: FilterParams): void {
@@ -72,6 +29,32 @@ export class CSVValidatorService {
 
     if (errors.length > 0) {
       throw new BadRequestException(`Filter validation errors: ${errors.join(', ')}`);
+    }
+  }
+
+  validateUploadedFile(file: Express.Multer.File): void {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new BadRequestException('File size exceeds 5MB limit');
+    }
+
+    if (!file.mimetype.includes('csv')) {
+      throw new BadRequestException('File must be a CSV');
+    }
+  }
+
+  validateCSVStructure(records: CSVRecord[]): void {
+    const requiredColumns = ['invoice_id', 'invoice_date', 'invoice_due_date', 'invoice_cost', 'invoice_currency', 'invoice_status', 'supplier_internal_id'];
+
+    const headers = Object.keys(records[0] || {});
+    const missingColumns = requiredColumns.filter((col) => !headers.includes(col));
+
+    if (missingColumns.length > 0) {
+      throw new BadRequestException(`Missing required columns: ${missingColumns.join(', ')}`);
     }
   }
 }

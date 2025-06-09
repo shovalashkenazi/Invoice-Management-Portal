@@ -58,13 +58,13 @@ export class InvoicesService {
     this.logger.log(`Starting CSV import, file size: ${file.size} bytes`);
 
     // File validation
-    this.csvParser.validateUploadedFile(file);
+    this.csvValidator.validateUploadedFile(file);
 
     // Parse CSV content
     const records = this.csvParser.parseCSVContent(file);
 
     // Validate CSV structure and data
-    this.csvParser.validateCSVStructure(records);
+    this.csvValidator.validateCSVStructure(records);
     this.csvValidator.validateUniqueInvoiceIds(records);
 
     // Process records in batches
