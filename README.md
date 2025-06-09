@@ -17,8 +17,6 @@ A fullstack application for managing and analyzing invoice data with interactive
 - **Prisma ORM** for database operations
 - **PostgreSQL** for data storage
 
-## 🚀 Features
-
 ### Business Logic
 
 - **Data Aggregation**: Efficient aggregation by status, month, and customer
